@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>     
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXAM-CBT - Portal Ujian CBT</title>
+
+   <!-- Icon Website (Favicon Tab Browser) -->
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgJzTniu51R9LLVcEl8PVlMDbfDN9JBDLPafE_ggxk61atB9ZElpEQc4nfCersGvUdi10chhU6zSrIpc3pVRCIDBCs5KbwYBidCg9yAicr5DQZu2eX_kPeksK34ry144fyZkBrpOSYUZDhliONpYjFzWUb01cX84JuArfBHqfK1jfSddlzXP0M0wcnrHroP/s320/logo_hp_app_1024.png">
+
+
+    <style>
+        /* Hilangkan semua jarak margin dasar */
+        body, html {
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            overflow: hidden; /* Mencegah scrollbar muncul di luar iframe */
+            background-color: #f8fafc; /* Warna background sama dengan Tailwind bg-slate-50 aplikasi Anda */
+        }
+        
+        /* Container untuk memanipulasi posisi iframe */
+        .iframe-container {
+            position: absolute;
+            top: -3px; /* MENARIK IFRAME KE ATAS UNTUK MENYEMBUNYIKAN BANNER GOOGLE (36px adalah tinggi standar banner) */
+            left: 0;
+            width: 100%;
+            height: calc(100% + 3px); /* Mengembalikan sisa tinggi di bawah agar tidak terpotong */
+        }
+        
+        iframe {
+            width: 100%; 
+            height: 100%; 
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="iframe-container">
+        <!-- Ganti dengan link Google Apps Script Anda -->
+        <!-- allow="fullscreen; screen-wake-lock" + allowfullscreen: WAJIB agar aplikasi di dalam iframe
+             boleh masuk mode layar penuh (fullscreen) dan menahan layar tetap menyala saat ujian. -->
+        <iframe
+            src="https://script.google.com/macros/s/AKfycbyBpMfdS3eVPPfhXfbD7OlmogBGi0rW9xQh_Yl-G39wgU-W2XD3-95mUmeTwxL_hjht/exec"
+            allow="fullscreen; screen-wake-lock"
+            allowfullscreen></iframe>
+    </div>
+</body>
+</html>
