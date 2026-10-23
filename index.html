@@ -8,6 +8,16 @@
        Semua pemanggilan server dikirim lewat fetch (POST) ke Web App Apps Script, tanpa cookie/akun Google,
        sehingga tidak terpengaruh login banyak akun di Chrome. Kode aplikasi di bawah tidak perlu diubah. */
     (function () {
+        /* NAMA RUANG PENYIMPANAN: semua aplikasi di project-smk.github.io berbagi satu "origin", sehingga
+           localStorage/sessionStorage (tema, sesi login, draf jawaban, dll) bisa saling menimpa antar aplikasi.
+           Semua kunci diberi awalan sesuai folder aplikasi ini (mis. /examcbt/) agar tiap aplikasi terpisah. */
+        try {
+            var NS = 'app:' + (location.pathname.replace(/index\.html$/, '').replace(/\/+$/, '') || '/') + ':';
+            var SP = Storage.prototype, gi = SP.getItem, si = SP.setItem, ri = SP.removeItem;
+            SP.getItem = function (k) { return gi.call(this, NS + k); };
+            SP.setItem = function (k, v) { return si.call(this, NS + k, v); };
+            SP.removeItem = function (k) { return ri.call(this, NS + k); };
+        } catch (e) {}
         var API_URL = 'https://script.google.com/macros/s/AKfycbyBpMfdS3eVPPfhXfbD7OlmogBGi0rW9xQh_Yl-G39wgU-W2XD3-95mUmeTwxL_hjht/exec';
         var TEMA_KEY = 'exam_theme_v1';
         function panggil(fn, args, ok, fail, user) {
