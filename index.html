@@ -1721,6 +1721,48 @@
                 </div>
             </div>
 
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                            <i class="fa-solid fa-database text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Saklar Backup Sheet Database</h4>
+                            <p class="text-xs text-slate-600">Kalau aktif, seluruh spreadsheet database (semua sheet: akun, soal, nilai, pengaturan) disalin otomatis ke folder Google Drive <b>setiap hari pada jam yang ditentukan</b>. Folder tujuannya sama dengan <b>Link Folder Google Drive</b> di atas, jadi isi link folder itu terlebih dahulu. Karena salinan berisi semua data (termasuk akun dan kunci jawaban), pastikan folder tersebut <b>hanya bisa diakses admin</b>.</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+                        <input type="checkbox" id="toggle-backup-db" onchange="toggleBackupDatabaseAdmin(this.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-primary-200 space-y-2">
+                        <h5 class="text-xs font-bold text-primary-900">Jam Backup Otomatis (WIB)</h5>
+                        <input type="time" id="input-backup-db-jam" value="23:00" class="w-full px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900">
+                        <p class="text-[11px] text-slate-500">Berjalan tiap hari sekitar jam ini (bisa meleset hingga ±15 menit).</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-primary-200 space-y-2">
+                        <h5 class="text-xs font-bold text-primary-900">Simpan Backup Otomatis Terakhir</h5>
+                        <input type="number" id="input-backup-db-simpan" min="0" max="60" value="7" class="w-full px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900">
+                        <p class="text-[11px] text-slate-500">Backup otomatis yang lebih lama dari batas ini dipindah ke Sampah Drive. Isi <b>0</b> bila tidak ingin ada yang dihapus. Backup manual tidak pernah dihapus otomatis.</p>
+                    </div>
+                </div>
+
+                <div id="status-backup-db" class="text-xs text-primary-700">Memeriksa status backup database...</div>
+
+                <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                    <button onclick="simpanJadwalBackupDatabase()" class="bg-white hover:bg-primary-100 text-primary-800 border border-primary-300 font-bold px-6 py-2.5 rounded-lg text-xs transition">
+                        Simpan Jam &amp; Batas
+                    </button>
+                    <button onclick="jalankanBackupDatabaseManual()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Backup Sekarang
+                    </button>
+                </div>
+            </div>
+
             <div class="bg-red-50 p-6 rounded-xl border border-red-200 space-y-4 shadow-sm">
                 <div>
                     <h3 class="font-bold text-red-800 text-sm mb-1"><i class="fa-solid fa-triangle-exclamation text-red-600 mr-1"></i> Hapus Semua Rekap Nilai</h3>
@@ -2523,7 +2565,7 @@
         'setPesanSiswaNonaktif', 'setModeWaktuPerSoal', 'setSettingValue', 'setSuaraPelanggaranAktif',
         'simpanSuaraPelanggaran', 'hapusSuaraPelanggaran', 'simpanSoal', 'simpanSoalEssay', 'hapusSoal',
         'hapusSoalBulk', 'hapusSoalEssay', 'importSoalBulk', 'hapusRekapNilai', 'hapusSemuaRekapNilai',
-        'editSkorRekapNilai', 'setLinkFolderBackup'
+        'editSkorRekapNilai', 'setLinkFolderBackup', 'aturBackupDatabaseAdmin'
     ];
     let adminLainAktif = false;          // true = ada admin lain yang masuk lebih dulu
     let adminLainKosongBerturut = 0;     // penahan supaya status tidak "berkedip"
@@ -7019,6 +7061,118 @@ let mapelDipilih = activeFoundMapelObj;
         }).setLinkFolderBackup(val);
     }
 
+    // ===== REVISI 134: BACKUP SHEET DATABASE (saklar harian + tombol manual) =====
+    function tampilkanStatusBackupDb(res) {
+        res = res || {};
+        let toggle = document.getElementById('toggle-backup-db');
+        let inJam = document.getElementById('input-backup-db-jam');
+        let inSimpan = document.getElementById('input-backup-db-simpan');
+        let box = document.getElementById('status-backup-db');
+        if (toggle) toggle.checked = res.aktif === true;
+        if (inJam && res.jam) inJam.value = res.jam;
+        if (inSimpan && res.simpan !== undefined && res.simpan !== null) inSimpan.value = res.simpan;
+        if (!box) return;
+        box.innerHTML = '';
+
+        let baris = document.createElement('div');
+        baris.className = 'font-bold ' + (res.aktif ? 'text-emerald-700' : 'text-amber-700');
+        let jamTeks = String(res.jam || '').replace(':', '.') + ' WIB';
+        if (res.izinKurang) {
+            baris.textContent = '⚠️ Izin trigger belum diberikan. Jalankan periksaIzinTrigger sekali dari editor Apps Script lalu deploy ulang.';
+        } else if (res.aktif) {
+            baris.textContent = '✅ AKTIF: backup otomatis tiap hari sekitar pukul ' + jamTeks;
+        } else {
+            baris.textContent = 'NONAKTIF (jam bila diaktifkan: ' + jamTeks + ')';
+        }
+        box.appendChild(baris);
+
+        if (res.folderTersedia === false) {
+            let w = document.createElement('div');
+            w.className = 'mt-1 font-bold text-amber-700';
+            w.textContent = '⚠️ Link folder Google Drive belum diisi, backup belum bisa dijalankan.';
+            box.appendChild(w);
+        }
+
+        let info = document.createElement('div');
+        info.className = 'mt-1';
+        if (res.terakhir) {
+            info.textContent = 'Backup terakhir: ' + res.terakhir.waktu + ' (' + res.terakhir.mode + ') - ' +
+                (res.terakhir.ok ? '' : 'GAGAL: ') + res.terakhir.pesan;
+        } else {
+            info.textContent = 'Belum pernah ada backup database.';
+        }
+        box.appendChild(info);
+    }
+
+    function muatStatusBackupDb() {
+        srv.withSuccessHandler(function (res) {
+            tampilkanStatusBackupDb(res);
+        }).withFailureHandler(function () {
+            let b = document.getElementById('status-backup-db');
+            if (b) b.textContent = 'Status backup database belum bisa diperiksa saat ini.';
+        }).statusBackupDatabaseAdmin();
+    }
+
+    function kirimPengaturanBackupDb(aktifkan, dariToggle) {
+        let toggle = document.getElementById('toggle-backup-db');
+        let jam = (document.getElementById('input-backup-db-jam').value || '').trim();
+        let simpan = parseInt(document.getElementById('input-backup-db-simpan').value, 10);
+        let batalkanToggle = function () { if (dariToggle && toggle) toggle.checked = !aktifkan; };
+        if (!jam) {
+            batalkanToggle();
+            showAlertModal("Jam Belum Diisi", "Isi jam backup otomatis terlebih dahulu.");
+            return;
+        }
+        if (isNaN(simpan)) {
+            batalkanToggle();
+            showAlertModal("Batas Belum Valid", "Isi jumlah backup otomatis yang disimpan (0 sampai 60).");
+            return;
+        }
+        showLoading("Backup Database", aktifkan ? "Menyimpan jadwal backup otomatis..." : "Menyimpan pengaturan...");
+        srv.withSuccessHandler(function (res) {
+            hideLoading();
+            if (res && res.status === 'success') {
+                tampilkanStatusBackupDb(res);
+                showAlertModal("Berhasil", res.message);
+            } else {
+                batalkanToggle();
+                showAlertModal("Tidak Dapat Disimpan", (res && res.message) || "Terjadi kesalahan yang tidak diketahui.");
+            }
+        }).withFailureHandler(function (err) {
+            hideLoading();
+            batalkanToggle();
+            showAlertModal("Gagal", "Pengaturan backup database belum berhasil: " + pesanError(err));
+        }).aturBackupDatabaseAdmin(aktifkan, jam, simpan);
+    }
+
+    function toggleBackupDatabaseAdmin(isChecked) { kirimPengaturanBackupDb(isChecked, true); }
+
+    function simpanJadwalBackupDatabase() {
+        let toggle = document.getElementById('toggle-backup-db');
+        kirimPengaturanBackupDb(!!(toggle && toggle.checked), false);
+    }
+
+    function jalankanBackupDatabaseManual() {
+        showConfirmModal("Backup Database Sekarang",
+            "Sistem akan menyalin seluruh spreadsheet database ke folder Google Drive backup. Prosesnya bisa memakan waktu beberapa detik sampai beberapa menit tergantung ukuran data. Lanjutkan?",
+            function () {
+                showLoading("Backup Database", "Menyalin spreadsheet ke Google Drive...");
+                srv.withSuccessHandler(function (res) {
+                    hideLoading();
+                    muatStatusBackupDb();
+                    if (res && res.status === 'success') {
+                        showAlertModal("Backup Berhasil", res.message);
+                    } else {
+                        showAlertModal("Backup Gagal", (res && res.message) || "Terjadi kesalahan yang tidak diketahui.");
+                    }
+                }).withFailureHandler(function (err) {
+                    hideLoading();
+                    muatStatusBackupDb();
+                    showAlertModal("Gagal", "Backup database belum berhasil: " + pesanError(err));
+                }).backupDatabaseManualAdmin();
+            });
+    }
+
     // REVISI 125: periode otomatis berdasarkan tanggal & bulan (tanpa tahun)
     const NAMA_PERIODE_PANEL = ['Mid Semester Ganjil', 'Semester Ganjil', 'Mid Semester Genap', 'Semester Genap'];
     const NAMA_BULAN_PANEL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -7111,6 +7265,7 @@ let mapelDipilih = activeFoundMapelObj;
 
         loadSuaraPelanggaranStatusAdmin();
         muatLinkFolderBackupAdmin();
+        muatStatusBackupDb(); // revisi 134
     }
 
     // ============================================================
@@ -9533,7 +9688,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Manajemen Guru</b>: tambah, ubah, hapus akun guru dan atur urutan daftar guru.</li>
             <li><b>Manajemen Siswa &amp; Ruang</b>: tambah siswa satuan atau import Excel, atur ruang ujian, acak username/password/token, nonaktifkan atau hapus siswa, dan cetak <b>Kartu Ujian</b>.</li>
             <li><b>Manajemen Mapel</b>: buat mapel, kode mapel, batas kumpul, dan hapus soal per mapel.</li>
-            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, wajib Firefox, folder backup, saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
+            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, wajib Firefox, folder backup, saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
             <li><b>Kredensial Admin &amp; Pengawas</b>: ganti username dan password Admin, Pengawas Sekolah, dan Pengawas Ujian.</li>
             <li><b>Tampilan</b>: tema warna aplikasi.</li>
           </ul>` },
