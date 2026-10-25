@@ -66,13 +66,34 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <!-- Encoder MP3 murni JS, dipakai HANYA di panel admin (Pengaturan Ujian)
-         untuk mengompres rekaman suara pelanggaran sebelum diupload. Tidak
-         dipakai di sisi siswa sama sekali. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+    <script>
+    /* REVISI 135: pustaka berat (xlsx, jsPDF, autotable, lamejs) HANYA dipakai Admin/Guru/Pengawas,
+       jadi tidak lagi dimuat di HP siswa. Dimuat otomatis setelah login non-siswa (lihat tampilkanSesiUser).
+       Urutan jsPDF -> autotable dijaga. */
+    (function () {
+        var janji = null;
+        function muat(src) {
+            return new Promise(function (ok) {
+                var s = document.createElement('script');
+                s.src = src; s.async = false;
+                s.onload = function () { ok(true); };
+                s.onerror = function () { ok(false); };
+                document.head.appendChild(s);
+            });
+        }
+        window.muatPustakaStaf = function () {
+            if (janji) return janji;
+            janji = Promise.all([
+                muat('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'),
+                muat('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(function () {
+                    return muat('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+                }),
+                muat('https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js')
+            ]);
+            return janji;
+        };
+    })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         /* PALET IDENTITAS SEKOLAH — ganti kode hex di bawah ini dengan warna
@@ -730,6 +751,36 @@
                 margin: 5mm;
             }
         }
+
+        /* =====================================================================
+           REVISI 135 - IKON PADA MENU TAB (ringan: memakai Font Awesome yang sudah
+           dimuat; tanpa gambar/aset baru, tanpa JavaScript, hanya CSS).
+           - Laptop: ikon dalam kotak kecil di kiri teks; menu aktif = kotak ikon berwarna aksen.
+           - HP/tablet: ikon di atas teks (lebih ringkas, mudah disentuh).
+           ===================================================================== */
+        .tab-btn .tab-ico { flex: none; font-size: .95em; line-height: 1; opacity: .8; transition: color .15s, background-color .15s, opacity .15s, transform .15s; }
+        .tab-btn:hover .tab-ico { opacity: 1; transform: translateY(-1px); }
+        .tab-btn-active .tab-ico { opacity: 1; }
+        .tab-btn:not(.hidden) { display: flex; align-items: center; justify-content: center; gap: .5rem; }
+        @media (max-width: 1023.98px) {
+            .tab-bar .tab-btn:not(.hidden) { flex-direction: column; gap: 5px; }
+            .tab-bar .tab-btn .tab-ico { font-size: 1.15rem; }
+            .tab-bar .tab-btn-active .tab-ico { color: inherit; }
+        }
+        @media (min-width: 1024px) {
+            .tab-bar .tab-btn:not(.hidden) { justify-content: flex-start; gap: 12px; }
+            .tab-bar .tab-btn .tab-ico {
+                width: 30px; height: 30px; display: grid; place-items: center;
+                border-radius: 8px; background: rgb(255 255 255 / .1); font-size: .875rem;
+            }
+            .tab-bar .tab-btn:hover .tab-ico { background: rgb(255 255 255 / .2); transform: none; }
+            .tab-bar .tab-btn-active .tab-ico { background: var(--secondary-500); color: var(--primary-900); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tab-btn .tab-ico { transition: none; }
+            .tab-btn:hover .tab-ico { transform: none; }
+        }
+        /* ===================== AKHIR REVISI 135 (ikon menu) ===================== */
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between overflow-x-hidden relative no-select">
@@ -920,12 +971,12 @@
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button onclick="switchAdminMainTab('guru')" id="tab-adm-main-guru" class="tab-btn tab-btn-active">Manajemen Guru</button>
-            <button onclick="switchAdminMainTab('siswa')" id="tab-adm-main-siswa" class="tab-btn">Manajemen Siswa & Ruang</button>
-            <button onclick="switchAdminMainTab('mapel')" id="tab-adm-main-mapel" class="tab-btn">Manajemen Mapel</button>
-            <button onclick="switchAdminMainTab('periode')" id="tab-adm-main-periode" class="tab-btn">Pengaturan Ujian</button>
-            <button onclick="switchAdminMainTab('akun-token')" id="tab-adm-main-akun-token" class="tab-btn">Kredensial Admin & Pengawas</button>
-            <button onclick="switchAdminMainTab('tampilan')" id="tab-adm-main-tampilan" class="tab-btn">Tampilan</button>
+            <button onclick="switchAdminMainTab('guru')" id="tab-adm-main-guru" class="tab-btn tab-btn-active"><i class="fa-solid fa-chalkboard-user tab-ico" aria-hidden="true"></i>Manajemen Guru</button>
+            <button onclick="switchAdminMainTab('siswa')" id="tab-adm-main-siswa" class="tab-btn"><i class="fa-solid fa-user-graduate tab-ico" aria-hidden="true"></i>Manajemen Siswa & Ruang</button>
+            <button onclick="switchAdminMainTab('mapel')" id="tab-adm-main-mapel" class="tab-btn"><i class="fa-solid fa-book-open tab-ico" aria-hidden="true"></i>Manajemen Mapel</button>
+            <button onclick="switchAdminMainTab('periode')" id="tab-adm-main-periode" class="tab-btn"><i class="fa-solid fa-sliders tab-ico" aria-hidden="true"></i>Pengaturan Ujian</button>
+            <button onclick="switchAdminMainTab('akun-token')" id="tab-adm-main-akun-token" class="tab-btn"><i class="fa-solid fa-user-shield tab-ico" aria-hidden="true"></i>Kredensial Admin & Pengawas</button>
+            <button onclick="switchAdminMainTab('tampilan')" id="tab-adm-main-tampilan" class="tab-btn"><i class="fa-solid fa-palette tab-ico" aria-hidden="true"></i>Tampilan</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
@@ -1974,7 +2025,7 @@
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button type="button" id="tab-pengawas-sekolah-tinjau" class="tab-btn tab-btn-active">Tinjau Soal &amp; Kunci</button>
+            <button type="button" id="tab-pengawas-sekolah-tinjau" class="tab-btn tab-btn-active"><i class="fa-solid fa-clipboard-check tab-ico" aria-hidden="true"></i>Tinjau Soal &amp; Kunci</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
@@ -2028,7 +2079,7 @@
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button onclick="switchPengawasUjianTab('monitoring')" id="tab-pengawas-ujian-monitoring" class="tab-btn tab-btn-active">Monitoring Live</button>
+            <button onclick="switchPengawasUjianTab('monitoring')" id="tab-pengawas-ujian-monitoring" class="tab-btn tab-btn-active"><i class="fa-solid fa-tower-broadcast tab-ico" aria-hidden="true"></i>Monitoring Live</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
@@ -2074,13 +2125,13 @@
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button onclick="switchGuruTab('input')" id="tab-btn-input" class="tab-btn tab-btn-active">Input Soal Berkelanjutan</button>
-            <button onclick="switchGuruTab('massal')" id="tab-btn-massal" class="tab-btn">Input Soal Massal</button>
-            <button onclick="switchGuruTab('essay'); loadSoalEssayGuru();" id="tab-btn-essay" class="tab-btn">Input Soal Essay</button>
-            <button onclick="switchGuruTab('daftar'); loadBankSoalGuru();" id="tab-btn-daftar" class="tab-btn">Bank Soal</button>
-            <button onclick="switchGuruTab('rekap'); segarkanSaklarGuru(); siapkanTabRekapGuru();" id="tab-btn-rekap" class="tab-btn">Rekap Nilai Siswa</button>
-            <button onclick="segarkanSaklarGuru(); switchGuruTab('dkn'); loadDKN();" id="tab-btn-dkn" class="tab-btn">DKN</button>
-            <button onclick="switchGuruTab('akun'); loadProfilGuru();" id="tab-btn-akun" class="tab-btn">Akun Guru</button>
+            <button onclick="switchGuruTab('input')" id="tab-btn-input" class="tab-btn tab-btn-active"><i class="fa-solid fa-pen-to-square tab-ico" aria-hidden="true"></i>Input Soal Berkelanjutan</button>
+            <button onclick="switchGuruTab('massal')" id="tab-btn-massal" class="tab-btn"><i class="fa-solid fa-file-import tab-ico" aria-hidden="true"></i>Input Soal Massal</button>
+            <button onclick="switchGuruTab('essay'); loadSoalEssayGuru();" id="tab-btn-essay" class="tab-btn"><i class="fa-solid fa-pen-nib tab-ico" aria-hidden="true"></i>Input Soal Essay</button>
+            <button onclick="switchGuruTab('daftar'); loadBankSoalGuru();" id="tab-btn-daftar" class="tab-btn"><i class="fa-solid fa-database tab-ico" aria-hidden="true"></i>Bank Soal</button>
+            <button onclick="switchGuruTab('rekap'); segarkanSaklarGuru(); siapkanTabRekapGuru();" id="tab-btn-rekap" class="tab-btn"><i class="fa-solid fa-chart-column tab-ico" aria-hidden="true"></i>Rekap Nilai Siswa</button>
+            <button onclick="segarkanSaklarGuru(); switchGuruTab('dkn'); loadDKN();" id="tab-btn-dkn" class="tab-btn"><i class="fa-solid fa-table-list tab-ico" aria-hidden="true"></i>DKN</button>
+            <button onclick="switchGuruTab('akun'); loadProfilGuru();" id="tab-btn-akun" class="tab-btn"><i class="fa-solid fa-circle-user tab-ico" aria-hidden="true"></i>Akun Guru</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
@@ -3534,6 +3585,7 @@
     // Menampilkan panel sesuai role. Dipakai saat login normal DAN saat sesi
     // dipulihkan setelah refresh (F5). Pada pemulihan, password tidak diketahui (p = null).
     function tampilkanSesiUser(res, u, p) {
+            try { if (res && String(res.role || '').toLowerCase() !== 'siswa' && window.muatPustakaStaf) window.muatPustakaStaf(); } catch (e) {} // REVISI 135
             currentUser = res;
             if (res.authToken) authTokenAktif = res.authToken;   // saat pemulihan sesi, token sudah diisi pemanggil
             authErrorDitangani = false;
@@ -4497,7 +4549,7 @@ let mapelDipilih = activeFoundMapelObj;
     }
 
     function scheduleNextPaksaKumpulCheck() {
-        let baseMs = 15000;
+        let baseMs = 30000; // REVISI 135: 15 -> 30 dtk (separuh beban server saat ratusan siswa ujian)
         let jitterMs = Math.floor(Math.random() * 5000); // 0-5 detik acak per siklus
         // (Lonjakan) Kalau polling sebelumnya gagal (server penuh/koneksi lemah), jeda
         // berikutnya dilebarkan bertahap (maks +45 detik). Polling ini tidak kritis
@@ -10971,6 +11023,13 @@ let mapelDipilih = activeFoundMapelObj;
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mulai); else mulai();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) gambar(); });
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+}
 </script>
 </body>
 </html>
