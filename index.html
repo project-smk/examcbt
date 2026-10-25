@@ -387,7 +387,7 @@
         .subtab-btn { display: inline-flex; align-items: center; gap: .45rem; padding: .5rem 1.1rem; border-radius: 999px; font-size: .8125rem; font-weight: 600; color: var(--slate-500); background: #fff; border: 1px solid var(--slate-200); transition: all .15s; }
         .subtab-btn:hover { color: var(--slate-800); border-color: var(--slate-300, #cbd5e1); }
         .subtab-btn-active, .subtab-btn-active:hover { background: var(--primary-600); color: #fff; border-color: var(--primary-600); box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
-        #guru-input-subbar.hidden { display: none; }
+        #guru-input-subbar.hidden, #admin-manaj-subbar.hidden { display: none; }
         .tab-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; margin-bottom: 1.5rem; background: var(--slate-100); border-radius: 14px; }
         .tab-btn { flex: 1 1 auto; padding: .55rem .95rem; border-radius: 10px; font-size: .8125rem; font-weight: 600; color: var(--slate-500); white-space: nowrap; text-align: center; }
         .tab-btn:hover { color: var(--slate-800); }
@@ -975,14 +975,19 @@
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button onclick="switchAdminMainTab('guru')" id="tab-adm-main-guru" class="tab-btn tab-btn-active"><i class="fa-solid fa-chalkboard-user tab-ico" aria-hidden="true"></i>Manajemen Guru</button>
-            <button onclick="switchAdminMainTab('siswa')" id="tab-adm-main-siswa" class="tab-btn"><i class="fa-solid fa-user-graduate tab-ico" aria-hidden="true"></i>Manajemen Siswa & Ruang</button>
-            <button onclick="switchAdminMainTab('mapel')" id="tab-adm-main-mapel" class="tab-btn"><i class="fa-solid fa-book-open tab-ico" aria-hidden="true"></i>Manajemen Mapel</button>
+            <button onclick="bukaManajemenAdmin()" id="tab-adm-main-guru" class="tab-btn tab-btn-active"><i class="fa-solid fa-users-gear tab-ico" aria-hidden="true"></i>Manajemen</button>
             <button onclick="switchAdminMainTab('periode')" id="tab-adm-main-periode" class="tab-btn"><i class="fa-solid fa-sliders tab-ico" aria-hidden="true"></i>Pengaturan Ujian</button>
             <button onclick="switchAdminMainTab('akun-token')" id="tab-adm-main-akun-token" class="tab-btn"><i class="fa-solid fa-user-shield tab-ico" aria-hidden="true"></i>Kredensial Admin & Pengawas</button>
             <button onclick="switchAdminMainTab('tampilan')" id="tab-adm-main-tampilan" class="tab-btn"><i class="fa-solid fa-palette tab-ico" aria-hidden="true"></i>Tampilan</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+        </div>
+
+        <!-- SUB-MENU MANAJEMEN: Guru | Siswa & Ruang | Mapel -->
+        <div id="admin-manaj-subbar" class="flex flex-wrap gap-2 mb-5">
+            <button type="button" onclick="switchAdminMainTab('guru')" id="admsub-btn-guru" class="subtab-btn subtab-btn-active"><i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>Guru</button>
+            <button type="button" onclick="switchAdminMainTab('siswa')" id="admsub-btn-siswa" class="subtab-btn"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i>Siswa &amp; Ruang</button>
+            <button type="button" onclick="switchAdminMainTab('mapel')" id="admsub-btn-mapel" class="subtab-btn"><i class="fa-solid fa-book-open" aria-hidden="true"></i>Mapel</button>
         </div>
 
         <div id="admin-subtab-guru" class="space-y-6">
@@ -4889,7 +4894,13 @@ let mapelDipilih = activeFoundMapelObj;
         }, 300);
     }
 
+    let _adminSubManajTerakhir = 'guru';
+    function bukaManajemenAdmin() { switchAdminMainTab(_adminSubManajTerakhir || 'guru'); }
+
     function switchAdminMainTab(tab) {
+        const SUB_MANAJ = ['guru', 'siswa', 'mapel'];
+        const adalahManaj = SUB_MANAJ.includes(tab);
+        if (adalahManaj) _adminSubManajTerakhir = tab;
         ['guru', 'siswa', 'mapel', 'periode', 'akun-token', 'tampilan'].forEach(t => {
             let btn = document.getElementById(`tab-adm-main-${t}`);
             let sub = document.getElementById(`admin-subtab-${t}`);
@@ -4897,10 +4908,17 @@ let mapelDipilih = activeFoundMapelObj;
             if (sub) sub.classList.add('hidden');
         });
         
-        let activeBtn = document.getElementById(`tab-adm-main-${tab}`);
+        // Tombol sidebar "Manajemen" (id tab-adm-main-guru) aktif untuk Guru/Siswa/Mapel
+        let activeBtn = document.getElementById(adalahManaj ? 'tab-adm-main-guru' : `tab-adm-main-${tab}`);
         let activeSub = document.getElementById(`admin-subtab-${tab}`);
         if (activeBtn) activeBtn.className = "tab-btn tab-btn-active";
         if (activeSub) activeSub.classList.remove('hidden');
+        let subBarAdm = document.getElementById('admin-manaj-subbar');
+        if (subBarAdm) subBarAdm.classList.toggle('hidden', !adalahManaj);
+        SUB_MANAJ.forEach(t => {
+            let sb = document.getElementById(`admsub-btn-${t}`);
+            if (sb) sb.className = "subtab-btn" + (t === tab ? " subtab-btn-active" : "");
+        });
 
         if (tab === 'siswa') {
             let editRowVal = document.getElementById('edit-siswa-row');
