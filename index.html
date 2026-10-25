@@ -384,6 +384,10 @@
         }
 
         /* ---------- Tab (segmented control) ---------- */
+        .subtab-btn { display: inline-flex; align-items: center; gap: .45rem; padding: .5rem 1.1rem; border-radius: 999px; font-size: .8125rem; font-weight: 600; color: var(--slate-500); background: #fff; border: 1px solid var(--slate-200); transition: all .15s; }
+        .subtab-btn:hover { color: var(--slate-800); border-color: var(--slate-300, #cbd5e1); }
+        .subtab-btn-active, .subtab-btn-active:hover { background: var(--primary-600); color: #fff; border-color: var(--primary-600); box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
+        #guru-input-subbar.hidden { display: none; }
         .tab-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; margin-bottom: 1.5rem; background: var(--slate-100); border-radius: 14px; }
         .tab-btn { flex: 1 1 auto; padding: .55rem .95rem; border-radius: 10px; font-size: .8125rem; font-weight: 600; color: var(--slate-500); white-space: nowrap; text-align: center; }
         .tab-btn:hover { color: var(--slate-800); }
@@ -2118,22 +2122,27 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <div>
                 <h2 class="text-xl sm:text-2xl font-black text-slate-900" id="guru-welcome">Panel Guru</h2>
-                <p class="text-slate-500 text-xs sm:text-sm">Input soal berkelanjutan, massal, soal essay, Bank Soal, & Profil Akun</p>
+                <p class="text-slate-500 text-xs sm:text-sm">Input Soal (berkelanjutan, massal, essay), Bank Soal, & Profil Akun</p>
             </div>
             <button onclick="logout()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition">Logout</button>
         </div>
 
         <div class="tab-bar">
             <div class="side-brand"><b>EXAM-CBT</b><span>SMK Swasta Nusantara Lubuk Pakam</span></div>
-            <button onclick="switchGuruTab('input')" id="tab-btn-input" class="tab-btn tab-btn-active"><i class="fa-solid fa-pen-to-square tab-ico" aria-hidden="true"></i>Input Soal Berkelanjutan</button>
-            <button onclick="switchGuruTab('massal')" id="tab-btn-massal" class="tab-btn"><i class="fa-solid fa-file-import tab-ico" aria-hidden="true"></i>Input Soal Massal</button>
-            <button onclick="switchGuruTab('essay'); loadSoalEssayGuru();" id="tab-btn-essay" class="tab-btn"><i class="fa-solid fa-pen-nib tab-ico" aria-hidden="true"></i>Input Soal Essay</button>
+            <button onclick="bukaInputSoal()" id="tab-btn-input" class="tab-btn tab-btn-active"><i class="fa-solid fa-pen-to-square tab-ico" aria-hidden="true"></i>Input Soal</button>
             <button onclick="switchGuruTab('daftar'); loadBankSoalGuru();" id="tab-btn-daftar" class="tab-btn"><i class="fa-solid fa-database tab-ico" aria-hidden="true"></i>Bank Soal</button>
             <button onclick="switchGuruTab('rekap'); segarkanSaklarGuru(); siapkanTabRekapGuru();" id="tab-btn-rekap" class="tab-btn"><i class="fa-solid fa-chart-column tab-ico" aria-hidden="true"></i>Rekap Nilai Siswa</button>
             <button onclick="segarkanSaklarGuru(); switchGuruTab('dkn'); loadDKN();" id="tab-btn-dkn" class="tab-btn"><i class="fa-solid fa-table-list tab-ico" aria-hidden="true"></i>DKN</button>
             <button onclick="switchGuruTab('akun'); loadProfilGuru();" id="tab-btn-akun" class="tab-btn"><i class="fa-solid fa-circle-user tab-ico" aria-hidden="true"></i>Akun Guru</button>
             <div class="side-cal" aria-label="Kalender"></div>
             <button type="button" onclick="logout()" class="side-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+        </div>
+
+        <!-- SUB-MENU INPUT SOAL: Berkelanjutan | Massal | Essay -->
+        <div id="guru-input-subbar" class="flex flex-wrap gap-2 mb-5">
+            <button type="button" onclick="switchGuruTab('input')" id="subtab-btn-input" class="subtab-btn subtab-btn-active"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>Berkelanjutan</button>
+            <button type="button" onclick="switchGuruTab('massal')" id="subtab-btn-massal" class="subtab-btn"><i class="fa-solid fa-file-import" aria-hidden="true"></i>Massal</button>
+            <button type="button" onclick="switchGuruTab('essay'); loadSoalEssayGuru();" id="subtab-btn-essay" class="subtab-btn"><i class="fa-solid fa-pen-nib" aria-hidden="true"></i>Essay</button>
         </div>
 
         <div id="guru-tab-input" class="space-y-6">
@@ -8197,17 +8206,34 @@ let mapelDipilih = activeFoundMapelObj;
         badgeCounter.classList.remove('hidden');
     }
 
+    let _guruSubInputTerakhir = 'input';
+    function bukaInputSoal() {
+        switchGuruTab(_guruSubInputTerakhir || 'input');
+        if (_guruSubInputTerakhir === 'essay') loadSoalEssayGuru();
+    }
+
     function switchGuruTab(tab) {
+        const SUB_INPUT = ['input', 'massal', 'essay'];
+        const adalahInputSoal = SUB_INPUT.includes(tab);
+        if (adalahInputSoal) _guruSubInputTerakhir = tab;
         ['input', 'massal', 'essay', 'daftar', 'rekap', 'dkn', 'akun'].forEach(t => {
             let btn = document.getElementById(`tab-btn-${t}`);
             let sub = document.getElementById(`guru-tab-${t}`);
             if (btn) btn.className = "tab-btn";
             if (sub) sub.classList.add('hidden');
         });
-        let activeBtn = document.getElementById(`tab-btn-${tab}`);
+        // Tombol sidebar "Input Soal" aktif untuk salah satu dari 3 sub-menu
+        let activeBtn = document.getElementById(adalahInputSoal ? 'tab-btn-input' : `tab-btn-${tab}`);
         let activeSub = document.getElementById(`guru-tab-${tab}`);
         if (activeBtn) activeBtn.className = "tab-btn tab-btn-active";
         if (activeSub) activeSub.classList.remove('hidden');
+        // Sub-menu hanya tampil di grup Input Soal
+        let subBar = document.getElementById('guru-input-subbar');
+        if (subBar) subBar.classList.toggle('hidden', !adalahInputSoal);
+        SUB_INPUT.forEach(t => {
+            let sb = document.getElementById(`subtab-btn-${t}`);
+            if (sb) sb.className = "subtab-btn" + (t === tab ? " subtab-btn-active" : "");
+        });
         // FIX: className = "tab-btn" di atas ikut menghapus kelas 'hidden', sehingga
         // tab DKN yang sudah disembunyikan saklar muncul lagi tiap pindah tab.
         // Terapkan ulang status saklar DKN setelah semua kelas direset.
