@@ -1554,20 +1554,40 @@
                 </label>
             </div>
 
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
                 <div class="flex items-center gap-3">
                     <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-brands fa-firefox-browser text-lg"></i>
+                        <i class="fa-solid fa-school text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-bold text-slate-900">Wajibkan Browser Mozilla Firefox</h4>
-                        <p class="text-xs text-slate-600">Mencegah siswa membuka ujian menggunakan browser selain Mozilla Firefox.</p>
+                        <h4 class="text-sm font-bold text-slate-900">Kelas Peserta Ujian</h4>
+                        <p class="text-xs text-slate-600">Pilih kelas/jurusan yang boleh melaksanakan ujian. Siswa dari kelas yang tidak dicentang tidak bisa membuka mapel maupun memulai ujian. Centang <b>Seluruh Kelas</b> untuk memilih semua jurusan pada kelas tersebut.</p>
                     </div>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
-                    <input type="checkbox" id="toggle-enforce-firefox" onchange="toggleSettingEnforceFirefox(this.checked)" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-X" onchange="toggleTingkatKelasUjian('X', this.checked)" class="rounded text-primary-600"> Seluruh Kelas X</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-AKL" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-MPLB" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-TJKT" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XI" onchange="toggleTingkatKelasUjian('XI', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XI</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-AKL" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-MPLB" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-TJKT" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XII" onchange="toggleTingkatKelasUjian('XII', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XII</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-AKL" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-MPLB" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-TJKT" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p id="kelas-ujian-ringkasan" class="text-xs text-slate-600"></p>
+                    <button type="button" onclick="simpanKelasUjian()" class="shrink-0 self-end sm:self-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Kelas Peserta Ujian</button>
+                </div>
             </div>
 
             <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
@@ -2905,8 +2925,99 @@
 
     let currentUser = null;
     let isExamActive = false;
-    let isAutoSaveDraftEnabled = true;
-    let isEnforceFirefoxEnabled = false; 
+    let isAutoSaveDraftEnabled = true; 
+    // ===== Kelas Peserta Ujian (Pengaturan Ujian > admin) =====
+    // Setting KELAS_UJIAN_AKTIF = JSON array, mis. ["X|*","XI|TJKT"] ("X|*" = seluruh Kelas X).
+    // Kosong/tidak ada (sheet lama) = semua kelas boleh ujian.
+    const KELAS_UJIAN_TINGKAT = ['X', 'XI', 'XII'];
+    const KELAS_UJIAN_JURUSAN = ['AKL', 'MPLB', 'TJKT'];
+
+    function terapkanSettingKelasUjian(settings) {
+        let raw = settings ? settings.KELAS_UJIAN_AKTIF : undefined;
+        let aktif = null;
+        if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+            try {
+                let arr = JSON.parse(String(raw));
+                if (Array.isArray(arr)) aktif = arr.map(x => String(x).trim().toUpperCase());
+            } catch (e) { aktif = null; }
+        }
+        KELAS_UJIAN_TINGKAT.forEach(t => {
+            KELAS_UJIAN_JURUSAN.forEach(j => {
+                let cb = document.getElementById('kelas-ujian-' + t + '-' + j);
+                if (cb) cb.checked = (aktif === null) || aktif.indexOf(t + '|*') > -1 || aktif.indexOf(t + '|' + j) > -1;
+            });
+        });
+        sinkronSemuaMasterKelasUjian();
+    }
+
+    function sinkronSemuaMasterKelasUjian() {
+        KELAS_UJIAN_TINGKAT.forEach(sinkronMasterKelasUjian);
+    }
+
+    function sinkronMasterKelasUjian(t) {
+        let master = document.getElementById('kelas-ujian-master-' + t);
+        if (!master) return;
+        let jumlah = 0;
+        KELAS_UJIAN_JURUSAN.forEach(j => {
+            let cb = document.getElementById('kelas-ujian-' + t + '-' + j);
+            if (cb && cb.checked) jumlah++;
+        });
+        master.checked = (jumlah === KELAS_UJIAN_JURUSAN.length);
+        master.indeterminate = (jumlah > 0 && jumlah < KELAS_UJIAN_JURUSAN.length);
+        let info = document.getElementById('kelas-ujian-ringkasan');
+        if (info) info.innerText = ringkasKelasUjian(ambilPilihanKelasUjian());
+    }
+
+    function toggleTingkatKelasUjian(t, checked) {
+        KELAS_UJIAN_JURUSAN.forEach(j => {
+            let cb = document.getElementById('kelas-ujian-' + t + '-' + j);
+            if (cb) cb.checked = checked;
+        });
+        sinkronMasterKelasUjian(t);
+    }
+
+    // Mengembalikan array kunci ("X|*" bila ketiga jurusan tercentang, selain itu "X|AKL" dst).
+    function ambilPilihanKelasUjian() {
+        let hasil = [];
+        KELAS_UJIAN_TINGKAT.forEach(t => {
+            let dipilih = KELAS_UJIAN_JURUSAN.filter(j => {
+                let cb = document.getElementById('kelas-ujian-' + t + '-' + j);
+                return cb && cb.checked;
+            });
+            if (dipilih.length === KELAS_UJIAN_JURUSAN.length) hasil.push(t + '|*');
+            else dipilih.forEach(j => hasil.push(t + '|' + j));
+        });
+        return hasil;
+    }
+
+    function ringkasKelasUjian(pilihan) {
+        if (!pilihan.length) return 'Belum ada kelas yang dipilih.';
+        let bagian = [];
+        KELAS_UJIAN_TINGKAT.forEach(t => {
+            if (pilihan.indexOf(t + '|*') > -1) { bagian.push('Seluruh Kelas ' + t); return; }
+            let jur = KELAS_UJIAN_JURUSAN.filter(j => pilihan.indexOf(t + '|' + j) > -1);
+            if (jur.length) bagian.push('Kelas ' + t + ' (' + jur.join(', ') + ')');
+        });
+        return 'Diizinkan: ' + bagian.join('; ') + '.';
+    }
+
+    function simpanKelasUjian() {
+        let pilihan = ambilPilihanKelasUjian();
+        if (!pilihan.length) {
+            showAlertModal("Belum Ada Kelas Dipilih", "Pilih minimal satu kelas/jurusan yang boleh melaksanakan ujian.");
+            return;
+        }
+        showLoading("Menyimpan Pengaturan", "Memperbarui kelas peserta ujian...");
+        srv.withSuccessHandler(msg => {
+            hideLoading();
+            showAlertModal("Pengaturan Tersimpan", ringkasKelasUjian(pilihan));
+        }).withFailureHandler(err => {
+            hideLoading();
+            showAlertModal("Gagal Menyimpan", "Pengaturan kelas peserta ujian belum tersimpan. Coba lagi.");
+        }).setSettingValue("KELAS_UJIAN_AKTIF", JSON.stringify(pilihan));
+    }
+
+
     // Saklar FAQ Pintar keseluruhan (Pengaturan Ujian > admin). Default tampil.
     let isFaqPintarAktif = true;
     // Saklar admin untuk panel guru (default aktif; dibaca dari Settings saat login)
@@ -3063,19 +3174,6 @@
             array[randomIndex] = temporaryValue;
         }
         return array;
-    }
-
-    function checkIsFirefoxBrowser() {
-        let ua = navigator.userAgent;
-        // Firefox asli (desktop & Android) selalu punya "Firefox/<versi>" di UA
-        // dan TIDAK punya "Seamonkey" (Seamonkey ikut menyertakan "Firefox" di
-        // UA-nya juga, jadi perlu dikecualikan supaya tidak salah kenali).
-        // Browser berbasis Gecko/Firefox lain di iOS (FxiOS) tetap dianggap
-        // Firefox karena memang varian resmi Mozilla untuk iOS.
-        let isSeamonkey = ua.indexOf("Seamonkey") > -1;
-        let isFirefoxDesktopAndroid = ua.indexOf("Firefox") > -1 && !isSeamonkey;
-        let isFirefoxIOS = ua.indexOf("FxiOS") > -1;
-        return isFirefoxDesktopAndroid || isFirefoxIOS;
     }
 
     function cleanModalTitle(t) {
@@ -3518,7 +3616,7 @@
     // sebentar sambil berpikir. TIDAK mengubah logika deteksi pelanggaran
     // manapun - kalau siswa memang pindah tab/keluar fullscreen, wake lock
     // akan dilepas browser sendiri dan alur pelanggaran tetap berjalan normal.
-    // Kalau browser yang dipakai (skrg wajib Firefox - lihat checkIsFirefoxBrowser)
+    // Kalau browser yang dipakai
     // tidak/belum mendukung Wake Lock API, fungsi ini diam saja (fail-safe di
     // baris pertama) - tidak mengganggu jalannya ujian sama sekali.
     async function requestExamWakeLock() {
@@ -3616,8 +3714,7 @@
             maxAttempts: 6,
             onRetry: () => updateLoadingSubtitle("Server sedang ramai, menghubungkan kembali otomatis...")
         }).withSuccessHandler(settings => {
-            isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false;
-            isEnforceFirefoxEnabled = (settings.ENFORCE_FIREFOX_BROWSER === true || settings.ENFORCE_FIREFOX_BROWSER === "true");
+            isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false; 
             terapkanSettingFaqPintar(settings);
             terapkanSettingGuruFitur(settings);
             isModeJadwalWaktuAktif = (settings.MODE_JADWAL_WAKTU_UJIAN === true || settings.MODE_JADWAL_WAKTU_UJIAN === "true");
@@ -3633,17 +3730,6 @@
             }).withSuccessHandler(res => {
                 hideLoading();
                 if (res.status === "success") {
-                    // Wajib Firefox HANYA berlaku untuk role siswa (saat mengerjakan ujian).
-                    // Admin, Guru, Pengawas Sekolah, dan Pengawas Ujian bebas memakai
-                    // browser apa saja untuk mengelola aplikasi.
-                    if (res.role === 'siswa' && isEnforceFirefoxEnabled && !checkIsFirefoxBrowser()) {
-                        showAlertModal(
-                            "⚠️ Browser Tidak Didukung",
-                            "Aplikasi Ujian EXAM-CBT diatur wajib diakses menggunakan browser **Mozilla Firefox**.\n\nSilakan download di Playstore & Appstore lalu buka aplikasi ini melalui Mozilla Firefox."
-                        );
-                        return;
-                    }
-
                     tampilkanSesiUser(res, u, p);
                     simpanSesiTersimpan();
                 } else {
@@ -3710,8 +3796,7 @@
             let toggle = document.getElementById('toggle-auto-save-draft');
             if (toggle) toggle.checked = isAutoSaveDraftEnabled;
 
-            let toggleFirefox = document.getElementById('toggle-enforce-firefox');
-            if (toggleFirefox) toggleFirefox.checked = isEnforceFirefoxEnabled;
+            terapkanSettingKelasUjian(settings);
 
             if (res.role === 'admin') {
                 document.getElementById('admin-section').classList.remove('hidden');
@@ -3754,18 +3839,13 @@
         }
         showLoading("Memulihkan Sesi", "Memuat ulang sesi Anda...");
         runRetry({ maxAttempts: 6 }).withSuccessHandler(settings => {
-            isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false;
-            isEnforceFirefoxEnabled = (settings.ENFORCE_FIREFOX_BROWSER === true || settings.ENFORCE_FIREFOX_BROWSER === "true");
+            isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false; 
             terapkanSettingFaqPintar(settings);
             terapkanSettingGuruFitur(settings);
             isModeJadwalWaktuAktif = (settings.MODE_JADWAL_WAKTU_UJIAN === true || settings.MODE_JADWAL_WAKTU_UJIAN === "true");
             isModePerSoalAktif = (settings.MODE_WAKTU_PER_SOAL === true || settings.MODE_WAKTU_PER_SOAL === "true");
             detikPerSoalSetting = parseInt(settings.DETIK_PER_SOAL || 30, 10) || 30;
             hideLoading();
-            if (s.user.role === 'siswa' && isEnforceFirefoxEnabled && !checkIsFirefoxBrowser()) {
-                hapusSesiTersimpan();
-                return;
-            }
             authTokenAktif = s.authToken;
             authErrorDitangani = false;
             // Siswa yang refresh saat ujian kembali ke layar pilih mapel (ujian tidak
@@ -5156,14 +5236,12 @@ let mapelDipilih = activeFoundMapelObj;
             isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false;
             let toggle = document.getElementById('toggle-auto-save-draft');
             if (toggle) toggle.checked = isAutoSaveDraftEnabled;
-
-            isEnforceFirefoxEnabled = (settings.ENFORCE_FIREFOX_BROWSER === true || settings.ENFORCE_FIREFOX_BROWSER === "true");
+ 
 
             terapkanSettingFaqPintar(settings);
 
             terapkanSettingGuruFitur(settings);
-            let toggleFirefox = document.getElementById('toggle-enforce-firefox');
-            if (toggleFirefox) toggleFirefox.checked = isEnforceFirefoxEnabled;
+            terapkanSettingKelasUjian(settings);
 
             isModeJadwalWaktuAktif = (settings.MODE_JADWAL_WAKTU_UJIAN === true || settings.MODE_JADWAL_WAKTU_UJIAN === "true");
             isModePerSoalAktif = (settings.MODE_WAKTU_PER_SOAL === true || settings.MODE_WAKTU_PER_SOAL === "true");
@@ -6757,15 +6835,6 @@ let mapelDipilih = activeFoundMapelObj;
         }).setAutoSaveSetting(isChecked);
     }
 
-    function toggleSettingEnforceFirefox(isChecked) {
-        showLoading("Menyimpan Pengaturan", "Memperbarui konfigurasi browser...");
-        srv.withSuccessHandler(msg => {
-            hideLoading();
-            isEnforceFirefoxEnabled = isChecked;
-            showAlertModal("Pengaturan Tersimpan", msg);
-        }).setSettingValue("ENFORCE_FIREFOX_BROWSER", isChecked ? "true" : "false");
-    }
-
     // Saklar FAQ Pintar keseluruhan. Nilai kosong/tidak ada (sheet lama) = tampil.
     function terapkanSettingFaqPintar(settings) {
         let v = settings ? settings.FAQ_PINTAR_TAMPIL : undefined;
@@ -7405,14 +7474,12 @@ let mapelDipilih = activeFoundMapelObj;
             isAutoSaveDraftEnabled = settings.ENABLE_AUTO_SAVE_DRAFT !== false;
             let toggle = document.getElementById('toggle-auto-save-draft');
             if (toggle) toggle.checked = isAutoSaveDraftEnabled;
-
-            isEnforceFirefoxEnabled = (settings.ENFORCE_FIREFOX_BROWSER === true || settings.ENFORCE_FIREFOX_BROWSER === "true");
+ 
 
             terapkanSettingFaqPintar(settings);
 
             terapkanSettingGuruFitur(settings);
-            let toggleFirefox = document.getElementById('toggle-enforce-firefox');
-            if (toggleFirefox) toggleFirefox.checked = isEnforceFirefoxEnabled;
+            terapkanSettingKelasUjian(settings);
 
             isModeJadwalWaktuAktif = (settings.MODE_JADWAL_WAKTU_UJIAN === true || settings.MODE_JADWAL_WAKTU_UJIAN === "true");
             isModePerSoalAktif = (settings.MODE_WAKTU_PER_SOAL === true || settings.MODE_WAKTU_PER_SOAL === "true");
@@ -9886,7 +9953,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Manajemen Guru</b>: tambah, ubah, hapus akun guru dan atur urutan daftar guru.</li>
             <li><b>Manajemen Siswa &amp; Ruang</b>: tambah siswa satuan atau import Excel, atur ruang ujian, acak username/password/token, nonaktifkan atau hapus siswa, dan cetak <b>Kartu Ujian</b>.</li>
             <li><b>Manajemen Mapel</b>: buat mapel, kode mapel, batas kumpul, dan hapus soal per mapel.</li>
-            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, wajib Firefox, folder backup, saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
+            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, pilihan Kelas Peserta Ujian, folder backup, saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
             <li><b>Kredensial Admin &amp; Pengawas</b>: ganti username dan password Admin, Pengawas Sekolah, dan Pengawas Ujian.</li>
             <li><b>Tampilan</b>: tema warna aplikasi.</li>
           </ul>` },
@@ -9898,7 +9965,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Mapel</b> terdaftar lengkap: guru pengampu, kelas, jurusan, durasi/jadwal, dan batas kumpul.</li>
             <li>Guru sudah menginput soal. Jika memakai Batas Soal Pilihan Ganda, soal harus <b>lebih banyak</b> dari batas.</li>
             <li><b>Periode Ujian Aktif</b>: tanggal mulai tiap periode (tanggal dan bulan) sudah diisi.</li>
-            <li>Pengaturan ujian sudah sesuai: toleransi pindah tab, batas pelanggaran, Saklar Waktu, suara pelanggaran, dan Firefox.</li>
+            <li>Pengaturan ujian sudah sesuai: toleransi pindah tab, batas pelanggaran, Saklar Waktu, suara pelanggaran, dan Kelas Peserta Ujian.</li>
             <li>Jalankan <b>Siapkan Cache Soal</b> sebelum ujian dimulai.</li>
             <li>Cetak dan bagikan <b>Kartu Ujian</b> siswa.</li>
             <li>Pastikan <b>Link Folder Google Drive</b> backup sudah diisi bila guru akan melakukan backup nilai.</li>
@@ -10166,9 +10233,9 @@ let mapelDipilih = activeFoundMapelObj;
       k: 'draf jawaban auto save simpan otomatis relogin logout jawaban hilang',
       a: `<p>Bila aktif, draf jawaban siswa diamankan saat ia ter-logout atau login kembali, sehingga jawaban yang sudah terisi tidak hilang. Ini berguna untuk siswa yang terkena pelanggaran lalu login ulang.</p>` },
 
-    { id: 'a24', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana mewajibkan siswa memakai Mozilla Firefox?',
-      k: 'firefox wajib browser siswa mozilla',
-      a: `<p>Aktifkan <b>Wajibkan Browser Mozilla Firefox</b> di <i>Pengaturan Ujian</i>. Siswa yang memakai browser lain akan ditolak saat login. Aturan ini <b>tidak</b> berlaku untuk admin, guru, dan pengawas.</p>` },
+    { id: 'a24', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana membatasi kelas yang boleh melaksanakan ujian?',
+      k: 'kelas peserta ujian jurusan seluruh kelas x xi xii akl mplb tjkt izin batasi',
+      a: `<p>Buka <i>Pengaturan Ujian</i> &gt; <b>Kelas Peserta Ujian</b>. Centang <b>Seluruh Kelas X</b> (atau XI/XII) untuk memilih semua jurusan, atau centang jurusan tertentu saja (AKL, MPLB, TJKT). Klik <b>Simpan Kelas Peserta Ujian</b>. Siswa dari kelas yang tidak dicentang tidak bisa membuka mapel atau memulai ujian; siswa yang sudah mengerjakan tetap bisa mengumpulkan jawaban. Minimal satu kelas harus dipilih.</p>` },
 
     { id: 'a25', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', pop: 1, q: 'Bagaimana mengisi Link Folder Google Drive untuk backup nilai guru?',
       k: 'folder drive google backup link nilai pdf akses editor izin simpan gagal',
@@ -10550,7 +10617,6 @@ let mapelDipilih = activeFoundMapelObj;
       a: `<ul>
             <li><b>Kartu Ujian</b> berisi username, password, token, dan (bila dicetak) kode mapel. Bila belum menerima, minta ke admin atau pengawas.</li>
             <li>Perangkat dengan <b>baterai penuh</b> dan <b>internet stabil</b>.</li>
-            <li>Browser <b>Mozilla Firefox</b> bila sekolah mewajibkannya untuk siswa.</li>
             <li>Tutup aplikasi dan tab lain agar tidak terhitung pelanggaran.</li>
             <li>Siapkan <b>kertas jawaban</b> bila ada soal essay.</li>
           </ul>` },
@@ -10614,10 +10680,6 @@ let mapelDipilih = activeFoundMapelObj;
       k: 'kumpul selesai submit hasil skor nilai muncul setelah mengumpulkan tidak bisa kembali',
       a: `<p>Jawaban dikirim, lalu <b>skor</b> siswa tampil. Mapel tersebut <b>tidak bisa dibuka atau diulang lagi</b>. Skor dihitung dari soal pilihan ganda, sedangkan essay tidak dinilai sistem.</p>` },
 
-    { id: 'n_ff', r: 'siswa', c: 'Aturan Ujian', q: 'Apakah siswa wajib memakai browser Mozilla Firefox?',
-      k: 'firefox browser chrome wajib ditolak siswa login browser lain',
-      a: `<p>Hanya bila admin mengaktifkan <b>Wajibkan Browser Mozilla Firefox</b>. Bila aktif, siswa yang memakai browser lain <b>ditolak saat login</b>; buka aplikasi lewat Firefox. Bila tidak diaktifkan, browser apa pun boleh dipakai.</p>` },
-
     { id: 'u10', r: 'siswa', c: 'Kendala Login', pop: 1, q: 'Siswa melapor tidak bisa login atau tidak bisa memulai ujian. Apa penyebab umumnya?',
       k: 'siswa tidak bisa login masuk mulai ujian token salah kode mapel nonaktif belum dimulai sudah berakhir tidak ditemukan',
       a: `<p>Periksa penyebab berikut secara berurutan:</p>
@@ -10628,7 +10690,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Kode Mapel salah</b> atau mapel tidak sesuai kelas &amp; jurusan siswa: muncul "Mapel Tidak Ditemukan".</li>
             <li><b>Sudah pernah mengumpulkan</b> mapel tersebut: ujian tidak dapat diulang.</li>
             <li><b>Di luar jam ujian</b> bila Saklar Waktu Ujian aktif: muncul "belum dimulai" atau "sudah berakhir".</li>
-            <li><b>Browser bukan Firefox</b> bila admin mewajibkan Firefox untuk siswa.</li>
+            <li><b>Kelas/jurusan siswa belum diizinkan</b> admin di Pengaturan Ujian &gt; Kelas Peserta Ujian: muncul pesan bahwa ujian untuk kelas tersebut belum dibuka.</li>
           </ol>` },
 
     { id: 's10', r: 'siswa', c: 'Kendala Login', q: 'Muncul pesan "Token Siswa 5 Digit Salah atau tidak sesuai dengan akun Anda!". Apa artinya?',
@@ -10676,10 +10738,6 @@ let mapelDipilih = activeFoundMapelObj;
     { id: 'u6', r: ['admin',  'guru',  'pengawas_sekolah',  'pengawas_ujian'], c: 'Dasar', q: 'Apa fungsi "Periode Ujian Aktif" yang tampil di panel?',
       k: 'periode semester mid ganjil genap uts uas pemberitahuan',
       a: `<p>Hanya <b>pemberitahuan</b> bagi siswa, guru, dan pengawas tentang periode yang sedang berjalan (Mid Semester Ganjil, Semester Ganjil, Mid Semester Genap, atau Semester Genap). Pengaturan ini <b>tidak membatasi</b> mapel yang bisa diakses. Periode berganti otomatis sesuai tanggal mulai (tanggal dan bulan) yang diatur admin di tab <i>Pengaturan Ujian</i>.</p>` },
-
-    { id: 'u5', r: ['admin',  'guru',  'pengawas_sekolah',  'pengawas_ujian'], c: 'Dasar', q: 'Apakah akun saya wajib memakai browser Mozilla Firefox?',
-      k: 'browser chrome firefox safari edge',
-      a: `<p>Tidak. Pembatasan Firefox <b>hanya berlaku untuk siswa</b> dan hanya jika admin mengaktifkannya. Admin, Guru, Pengawas Sekolah, dan Pengawas Ujian bebas memakai browser apa saja.</p>` },
 
     { id: 'u4', r: ['admin',  'guru',  'pengawas_sekolah',  'pengawas_ujian'], c: 'Kendala Teknis', pop: 1, q: 'Muncul pesan "Server sedang ramai" atau loading terasa lama. Apa yang harus dilakukan?',
       k: 'lambat lemot loading macet error server sibuk timeout deadline gagal koneksi',
