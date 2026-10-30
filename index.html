@@ -3796,8 +3796,6 @@
             let toggle = document.getElementById('toggle-auto-save-draft');
             if (toggle) toggle.checked = isAutoSaveDraftEnabled;
 
-            terapkanSettingKelasUjian(settings);
-
             if (res.role === 'admin') {
                 document.getElementById('admin-section').classList.remove('hidden');
                 loadAdminData();
