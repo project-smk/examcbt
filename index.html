@@ -1064,7 +1064,15 @@
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1">Format <b>cbt + 4 digit angka</b> (contoh: cbt4253) &amp; unik. Terisi otomatis, boleh diedit manual (jika hanya 4 digit, awalan cbt ditambahkan otomatis).</p>
                         </div>
-                        <div><label class="block font-semibold uppercase text-slate-600 mb-1">Password</label><input type="text" id="adm-s-pass" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" oninput="this.value=this.value.replace(/\D/g,'')" placeholder="4 digit angka" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono"><p class="text-[10px] text-slate-400 mt-1">Wajib 4 digit angka (contoh: 7391). Terisi otomatis untuk siswa baru. Token siswa (5 digit) dibuat otomatis oleh sistem.</p></div>
+                        <div><label class="block font-semibold uppercase text-slate-600 mb-1">Password</label><input type="text" id="adm-s-pass" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" oninput="this.value=this.value.replace(/\D/g,'')" placeholder="4 digit angka" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono"><p class="text-[10px] text-slate-400 mt-1">Wajib 4 digit angka (contoh: 7391). Terisi otomatis untuk siswa baru.</p></div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">5 Digit Token Siswa</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="adm-s-token" maxlength="5" readonly placeholder="Otomatis acak 5 digit" class="flex-1 w-full px-3 py-2 border border-primary-400 rounded-lg font-mono font-bold tracking-widest text-primary-800 bg-primary-50/50 cursor-not-allowed">
+                                <button type="button" onclick="acakTokenSiswa()" title="Acak ulang token siswa" class="shrink-0 bg-slate-700 hover:bg-slate-800 text-white px-3 rounded-lg text-[11px] font-bold whitespace-nowrap transition"><i class="fa-solid fa-shuffle mr-1"></i>Acak</button>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1">Wajib 5 digit angka (10000-99999), terisi otomatis &amp; dijamin berbeda dari token siswa lain. Tombol Acak untuk membuat ulang.</p>
+                        </div>
                         <div><label class="block font-semibold uppercase text-slate-600 mb-1">Nama Lengkap</label><input type="text" id="adm-s-nama" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"></div>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -1098,7 +1106,7 @@
                 <div class="bg-primary-50/70 p-5 rounded-xl border border-primary-200 flex flex-col justify-between">
                     <div>
                         <h3 class="font-bold text-primary-900 mb-2 text-sm"><i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Import Massal Siswa (Excel)</h3>
-                        <p class="text-xs text-primary-700 mb-4">Gunakan template Microsoft Excel resmi. Kolom <b>Username dan Password boleh dikosongkan</b> &mdash; sistem membuatkan otomatis <b>cbt + 4 digit angka acak</b> (contoh: cbt4253, username unik). Jika diisi manual, <b>Username berformat cbt + 4 digit</b> (atau cukup 4 digit, awalan cbt ditambahkan otomatis) dan <b>Password wajib tepat 4 digit angka</b>; baris yang tidak sesuai dilewati. Token (5 digit) &amp; Ruang Ujian dibuat otomatis.</p>
+                        <p class="text-xs text-primary-700 mb-4">Gunakan template Microsoft Excel resmi. Kolom <b>Username dan Password boleh dikosongkan</b> &mdash; sistem membuatkan otomatis <b>cbt + 4 digit angka acak</b> (contoh: cbt4253, username unik). Jika diisi manual, <b>Username berformat cbt + 4 digit</b> (atau cukup 4 digit, awalan cbt ditambahkan otomatis) dan <b>Password wajib tepat 4 digit angka</b>; baris yang tidak sesuai dilewati. Token (5 digit) &amp; Ruang Ujian dibuat otomatis. Kolom <b>token_siswa</b> pada file (mis. hasil export aplikasi lain) diabaikan: username &amp; password dipakai apa adanya, token dibuat <b>baru</b>.</p>
                         <button onclick="downloadTemplateExcel()" class="bg-white border border-primary-300 hover:bg-primary-100 text-primary-800 font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm mb-4 w-full flex items-center justify-center gap-2">
                             <i class="fa-solid fa-download text-primary-600"></i> Download Template Excel (.xlsx)
                         </button>
@@ -5101,6 +5109,10 @@ let mapelDipilih = activeFoundMapelObj;
             if (editRowVal && userFieldVal && !editRowVal.value && !userFieldVal.value) {
                 userFieldVal.value = generateUsername4DigitLocal();
             }
+            let tokFieldVal = document.getElementById('adm-s-token');
+            if (editRowVal && tokFieldVal && !editRowVal.value && !tokFieldVal.value) {
+                tokFieldVal.value = generateTokenSiswa5DigitLocal();
+            }
         } else if (tab === 'mapel') {
             loadAdminMapelList();
         } else if (tab === 'profil') {
@@ -5437,8 +5449,13 @@ let mapelDipilih = activeFoundMapelObj;
             nama: document.getElementById('adm-s-nama').value.trim(),
             kelas: document.getElementById('adm-s-kelas').value,
             jurusan: document.getElementById('adm-s-jurusan').value,
-            ruang: document.getElementById('adm-s-ruang').value
+            ruang: document.getElementById('adm-s-ruang').value,
+            tokenSiswa: document.getElementById('adm-s-token').value.trim()
         };
+        if (data.tokenSiswa && !/^[1-9]\d{4}$/.test(data.tokenSiswa)) {
+            showAlertModal("Peringatan", "Token siswa harus tepat 5 digit angka. Tekan tombol Acak untuk membuat token baru.");
+            return;
+        }
         if(!data.password || !data.nama) {
             showAlertModal("Peringatan", "Password dan Nama Lengkap wajib diisi! (Username otomatis jika dikosongkan)");
             return;
@@ -5472,6 +5489,7 @@ let mapelDipilih = activeFoundMapelObj;
         document.getElementById('adm-s-kelas').value = u.kelas || 'X';
         document.getElementById('adm-s-jurusan').value = u.jurusan || 'TJKT';
         document.getElementById('adm-s-ruang').value = u.ruang || 'Ruang 1';
+        document.getElementById('adm-s-token').value = u.tokenSiswa || generateTokenSiswa5DigitLocal();
         document.getElementById('lbl-form-siswa-title').innerText = "Edit Siswa: " + u.nama;
         document.getElementById('btn-cancel-edit-siswa').classList.remove('hidden');
     }
@@ -5487,6 +5505,28 @@ let mapelDipilih = activeFoundMapelObj;
             guard++;
         } while (existing.has(uname) && guard < 500);
         return uname;
+    }
+
+    // REVISI 139: token siswa acak 5 digit (10000-99999), dicek dulu supaya tidak sama dengan token siswa lain
+    // yang sudah termuat (siswa yang sedang diedit dikecualikan). Server tetap memeriksa keunikan.
+    function generateTokenSiswa5DigitLocal() {
+        let editRowVal = document.getElementById('edit-siswa-row') ? document.getElementById('edit-siswa-row').value : "";
+        let existing = new Set(
+            (allAdminUsersData || [])
+                .filter(u => String(u.role || '').trim().toLowerCase() === 'siswa' && (!editRowVal || String(u.rowIndex) !== String(editRowVal)))
+                .map(u => String(u.tokenSiswa || '').trim())
+        );
+        let tok = "";
+        let guard = 0;
+        do {
+            tok = String(Math.floor(10000 + Math.random() * 90000));
+            guard++;
+        } while (existing.has(tok) && guard < 500);
+        return tok;
+    }
+
+    function acakTokenSiswa() {
+        document.getElementById('adm-s-token').value = generateTokenSiswa5DigitLocal();
     }
 
     function acakUsernameSiswa() {
@@ -5521,6 +5561,7 @@ let mapelDipilih = activeFoundMapelObj;
         document.getElementById('adm-s-pass').value = String(Math.floor(1000 + Math.random() * 9000));
         document.getElementById('adm-s-nama').value = "";
         document.getElementById('adm-s-ruang').value = "Ruang 1";
+        document.getElementById('adm-s-token').value = generateTokenSiswa5DigitLocal();
         document.getElementById('lbl-form-siswa-title').innerText = "Tambah / Edit Siswa Satuan";
         document.getElementById('btn-cancel-edit-siswa').classList.add('hidden');
     }
@@ -11294,6 +11335,15 @@ function fpApplyGate_(user) {
 function renderSiswaFotoCard_(user, msg) {
   _fpPending = null;
   const g = id => document.getElementById(id);
+  // REVISI 139: saklar mati -> kartu foto tidak tampil sama sekali, formulir ujian tidak dikunci, foto tidak dipakai.
+  if (!fpWajib_(user)) {
+    const kartuOff = g('siswaFotoCard'); if (kartuOff) kartuOff.style.display = 'none';
+    fpFillAvatar_(g('siswa-avatar-inisial'), '', user.nama, 64);
+    const noticeOff = g('fpHapusNotice'); if (noticeOff) { noticeOff.classList.add('hidden'); noticeOff.textContent = ''; }
+    fpApplyGate_(user);
+    return;
+  }
+  const kartuOn = g('siswaFotoCard'); if (kartuOn) kartuOn.style.display = '';
   fpFillAvatar_(g('siswaFotoAvatar'), user.fotoProfil, user.nama, 160);
   fpFillAvatar_(g('siswa-avatar-inisial'), user.fotoProfil, user.nama, 64);
   if (g('siswaFotoName')) g('siswaFotoName').textContent = user.nama || '';
@@ -11309,7 +11359,7 @@ function fpInisialisasiSiswa_() {
   if (!currentUser || currentUser.role !== 'siswa') return;
   renderSiswaFotoCard_(currentUser);
   fpSegarkanDariServer_(false);
-  if (!fpDriveId_(currentUser.fotoProfil)) { setTimeout(function () { try { const p = fpWarmup_(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }, 2500); }   // siapkan pemeriksa wajah sebelum tombol ditekan
+  if (fpWajib_(currentUser) && !fpDriveId_(currentUser.fotoProfil)) { setTimeout(function () { try { const p = fpWarmup_(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }, 2500); }   // siapkan pemeriksa wajah sebelum tombol ditekan
 }
 function fpSegarkanDariServer_(paksaRender) {
   srv.withSuccessHandler(function (res) {
@@ -11317,7 +11367,8 @@ function fpSegarkanDariServer_(paksaRender) {
       if (!res || !res.success || !currentUser || currentUser.role !== 'siswa') return;
       if (_fpPending) return;   // jangan ganggu siswa yang sedang memilih foto
       const baru = res.fotoProfil || '', alasan = res.fotoHapusAlasan || '', oleh = res.fotoHapusOleh || '';
-      const sama = (currentUser.fotoProfil || '') === baru && (currentUser.fotoHapusAlasan || '') === alasan && (currentUser.fotoHapusOleh || '') === oleh;
+      const sama = (currentUser.fotoProfil || '') === baru && (currentUser.fotoHapusAlasan || '') === alasan && (currentUser.fotoHapusOleh || '') === oleh
+        && (typeof res.wajibFotoProfil !== 'boolean' || fpWajib_(currentUser) === res.wajibFotoProfil);
       currentUser.fotoProfil = baru; currentUser.fotoHapusAlasan = alasan; currentUser.fotoHapusTgl = res.fotoHapusTgl || ''; currentUser.fotoHapusOleh = oleh;
       if (typeof res.wajibFotoProfil === 'boolean') currentUser.wajibFotoProfil = res.wajibFotoProfil;
       if (sama && !paksaRender) return;
@@ -11595,7 +11646,14 @@ function psBuild_() {
   const sel = 'w-full border px-3 py-2 rounded-lg text-xs bg-white';
   const lbl = 'block text-[11px] font-bold text-slate-600 mb-1';
   root.innerHTML =
-    '<div class="bg-white p-5 rounded-xl shadow-sm border space-y-4">'
+    '<div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm mb-4">'
+    + '<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center shrink-0"><i class="fa-solid fa-camera"></i></div>'
+    + '<div><h4 class="text-sm font-bold text-slate-900">Wajibkan Foto Profil Siswa</h4>'
+    + '<p class="text-xs text-slate-600">Aktif = kartu foto profil tampil di laman siswa dan siswa <b>wajib</b> mengambil selfie sebelum bisa mencari mapel / memulai ujian. Nonaktif = kartu foto <b>tidak tampil</b> di laman siswa dan foto tidak wajib. Aturan dibaca server setiap siswa login.</p></div></div>'
+    + '<label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">'
+    + '<input type="checkbox" id="psToggleWajib" checked onchange="toggleWajibFotoProfil(this.checked)" class="sr-only peer">'
+    + '<div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div></label></div>'
+    + '<div class="bg-white p-5 rounded-xl shadow-sm border space-y-4">'
     + '<div><h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-id-badge text-primary-600 mr-2"></i>Profil Siswa</h3>'
     + '<p class="text-xs text-slate-500">Lihat foto profil siswa. Foto yang tidak sesuai bisa dihapus dengan memilih alasan; siswa akan melihat alasannya dan diminta mengambil selfie baru sebelum bisa mengikuti ujian.</p></div>'
     + '<div class="grid grid-cols-2 md:grid-cols-5 gap-3">'
@@ -11627,6 +11685,27 @@ function psImg_(box, url, nama, size) {
   img.onload = function () { box.textContent = ''; box.appendChild(img); };
   img.onerror = function () { if (tried++ === 0) img.src = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w' + size; };
   img.src = 'https://lh3.googleusercontent.com/d/' + id + '=s' + size;
+}
+// REVISI 139: saklar "foto profil wajib" (disimpan server di Settings: WAJIB_FOTO_PROFIL).
+function psSetToggleWajib_(v) {
+  const t = document.getElementById('psToggleWajib');
+  if (t && typeof v === 'boolean') t.checked = v;
+}
+function toggleWajibFotoProfil(isChecked) {
+  const t = document.getElementById('psToggleWajib');
+  if (t) t.disabled = true;
+  showLoading("Menyimpan Pengaturan", "Memperbarui aturan foto profil siswa...");
+  srv.withSuccessHandler(function () {
+    hideLoading();
+    if (t) t.disabled = false;
+    showAlertModal("Pengaturan Tersimpan", isChecked
+      ? "Foto profil sekarang WAJIB. Kartu foto tampil di laman siswa dan siswa harus mengambil selfie sebelum bisa mengikuti ujian."
+      : "Foto profil sekarang TIDAK wajib. Kartu foto disembunyikan dari laman siswa dan siswa bisa langsung mengikuti ujian.");
+  }).withFailureHandler(function (err) {
+    hideLoading();
+    if (t) { t.disabled = false; t.checked = !isChecked; }
+    showAlertModal("Gagal", "Pengaturan tidak tersimpan: " + ((err && err.message) || err || "coba lagi."));
+  }).setSettingValue("WAJIB_FOTO_PROFIL", isChecked ? "true" : "false");
 }
 function psCariDebounce_() { clearTimeout(PS.timer); PS.timer = setTimeout(() => renderProfilSiswa_(true), 250); }
 function psTampilLagi_() { PS.shown += PS_PAGE; renderProfilSiswa_(false); }
@@ -11698,6 +11777,7 @@ function loadProfilSiswa() {
     if (!res || !res.success) { if (info) info.textContent = 'Gagal memuat data.'; return; }
     PS.data = res.siswa || [];
     PS.opsi = res.alasan || [];
+    psSetToggleWajib_(res.wajibFoto);
     renderProfilSiswa_(true);
   }).withFailureHandler(err => {
     if (info) info.textContent = 'Gagal memuat: ' + ((err && err.message) || err);
