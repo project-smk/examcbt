@@ -1106,7 +1106,7 @@
                 <div class="bg-primary-50/70 p-5 rounded-xl border border-primary-200 flex flex-col justify-between">
                     <div>
                         <h3 class="font-bold text-primary-900 mb-2 text-sm"><i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Import Massal Siswa (Excel)</h3>
-                        <p class="text-xs text-primary-700 mb-4">Gunakan template Microsoft Excel resmi. Kolom <b>Username dan Password boleh dikosongkan</b> &mdash; sistem membuatkan otomatis <b>cbt + 4 digit angka acak</b> (contoh: cbt4253, username unik). Jika diisi manual, <b>Username berformat cbt + 4 digit</b> (atau cukup 4 digit, awalan cbt ditambahkan otomatis) dan <b>Password wajib tepat 4 digit angka</b>; baris yang tidak sesuai dilewati. Token (5 digit) &amp; Ruang Ujian dibuat otomatis. Kolom <b>token_siswa</b> pada file (mis. hasil export aplikasi lain) diabaikan: username &amp; password dipakai apa adanya, token dibuat <b>baru</b>.</p>
+                        <p class="text-xs text-primary-700 mb-4">Gunakan template Microsoft Excel resmi. Kolom <b>Username dan Password boleh dikosongkan</b> &mdash; sistem membuatkan otomatis <b>cbt + 4 digit angka acak</b> (contoh: cbt4253, username unik). Jika diisi manual, <b>Username berformat cbt + 4 digit</b> (atau cukup 4 digit, awalan cbt ditambahkan otomatis) dan <b>Password wajib tepat 4 digit angka</b>; baris yang tidak sesuai dilewati. Ruang Ujian dibuat otomatis. Kolom <b>token_siswa</b> boleh diisi (mis. hasil export aplikasi lain) dan akan <b>dipertahankan</b> bila 5 digit &amp; tidak kembar; jika kosong / tidak valid / kembar dibuat otomatis. Token tetap bisa diacak ulang.</p>
                         <button onclick="downloadTemplateExcel()" class="bg-white border border-primary-300 hover:bg-primary-100 text-primary-800 font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm mb-4 w-full flex items-center justify-center gap-2">
                             <i class="fa-solid fa-download text-primary-600"></i> Download Template Excel (.xlsx)
                         </button>
@@ -5991,10 +5991,10 @@ let mapelDipilih = activeFoundMapelObj;
 
     function downloadTemplateExcel() {
         let data = [
-            ["username", "password", "nama", "kelas", "jurusan", "ruang"],
-            ["", "123", "Budi Setiawan", "X", "TJKT", "Ruang 1"],
-            ["siswa02", "123", "Ani Lestari", "XI", "AKL", "Ruang 2"],
-            ["", "123", "Catur Nugroho", "XII", "MPLB", "Ruang 3"]
+            ["username", "password", "nama", "kelas", "jurusan", "ruang", "token_siswa"],
+            ["", "123", "Budi Setiawan", "X", "TJKT", "Ruang 1", ""],
+            ["siswa02", "123", "Ani Lestari", "XI", "AKL", "Ruang 2", ""],
+            ["", "123", "Catur Nugroho", "XII", "MPLB", "Ruang 3", ""]
         ];
         let ws = XLSX.utils.aoa_to_sheet(data);
         let wb = XLSX.utils.book_new();
@@ -6026,7 +6026,8 @@ let mapelDipilih = activeFoundMapelObj;
                             nama: String(row[2]).trim(),
                             kelas: row[3] ? String(row[3]).trim() : 'X',
                             jurusan: row[4] ? String(row[4]).trim() : 'TJKT',
-                            ruang: row[5] ? String(row[5]).trim() : 'Ruang 1'
+                            ruang: row[5] ? String(row[5]).trim() : 'Ruang 1',
+                            tokenSiswa: row[6] ? String(row[6]).trim() : ""
                         });
                     }
                 }
