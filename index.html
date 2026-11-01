@@ -388,6 +388,13 @@
         .subtab-btn:hover { color: #000; border-color: var(--slate-500, #64748b); }
         .subtab-btn-active, .subtab-btn-active:hover { background: var(--primary-600); color: #fff; border-color: var(--primary-600); box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
         #guru-input-subbar.hidden, #admin-manaj-subbar.hidden { display: none; }
+        /* Sub-tab HP: grid 2 kolom, minimalis & rata */
+        @media (max-width: 640px) {
+            #pengaturan-subbar:not(.hidden), #admin-manaj-subbar:not(.hidden) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+            #pengaturan-subbar .subtab-btn, #admin-manaj-subbar .subtab-btn { justify-content: center; text-align: center; gap: .4rem; min-height: 44px; padding: .5rem .5rem; border-radius: 12px; border-width: 1px; font-size: .78rem; font-weight: 600; line-height: 1.2; color: var(--slate-700, #334155); box-shadow: none; }
+            #pengaturan-subbar .subtab-btn i, #admin-manaj-subbar .subtab-btn i { font-size: .85em; opacity: .8; }
+            #pengaturan-subbar .subtab-btn-active, #admin-manaj-subbar .subtab-btn-active { color: #fff; font-weight: 700; box-shadow: none; }
+        }
         .tab-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; margin-bottom: 1.5rem; background: var(--slate-100); border-radius: 14px; }
         .tab-btn { flex: 1 1 auto; padding: .55rem .95rem; border-radius: 10px; font-size: .8125rem; font-weight: 600; color: var(--slate-500); white-space: nowrap; text-align: center; }
         .tab-btn:hover { color: var(--slate-800); }
@@ -1550,7 +1557,7 @@
             <div id="pengaturan-subbar" class="flex flex-wrap gap-2">
                 <button type="button" onclick="switchPengaturanSub('jadwal')" id="pengsub-btn-jadwal" class="subtab-btn subtab-btn-active"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal &amp; Waktu</button>
                 <button type="button" onclick="switchPengaturanSub('aturan')" id="pengsub-btn-aturan" class="subtab-btn"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Aturan Ujian</button>
-                <button type="button" onclick="switchPengaturanSub('akses')" id="pengsub-btn-akses" class="subtab-btn"><i class="fa-solid fa-lock" aria-hidden="true"></i>Akses, Kunci &amp; Panel Guru</button>
+                <button type="button" onclick="switchPengaturanSub('akses')" id="pengsub-btn-akses" class="subtab-btn"><i class="fa-solid fa-lock" aria-hidden="true"></i>Akses &amp; Kunci</button>
                 <button type="button" onclick="switchPengaturanSub('sistem')" id="pengsub-btn-sistem" class="subtab-btn"><i class="fa-solid fa-database" aria-hidden="true"></i>Data &amp; Sistem</button>
             </div>
             <div id="pengaturan-panel-jadwal" class="space-y-6">
