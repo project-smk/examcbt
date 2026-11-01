@@ -1598,6 +1598,44 @@
                 </div>
             </div>
 
+            <!-- REVISI 140: SAKLAR KUNCI SOAL MAPEL -->
+            <div id="card-kunci-soal-mapel" class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-lock text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Saklar Kunci Soal Mapel</h4>
+                        <p class="text-xs text-slate-600">Kunci mapel selama ujian berlangsung. Pada mapel yang dikunci, <b>guru tidak bisa menambah, mengubah, menghapus, maupun mengimpor soal</b> (pilihan ganda dan essay). Soal yang sudah ada tetap dipakai ujian. Admin tidak terpengaruh. Gunakan filter kelas dan jurusan, centang mapel yang ingin dikunci, lalu tekan <b>Kunci Mapel Terpilih</b>.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <select id="kunci-soal-filter-kelas" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Kelas</option></select>
+                    <select id="kunci-soal-filter-jurusan" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Jurusan</option></select>
+                    <input type="text" id="kunci-soal-cari" oninput="renderKartuKunciSoal()" placeholder="Cari nama mapel / guru..." class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900">
+                </div>
+                <div class="bg-white border border-primary-200 rounded-lg">
+                    <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-primary-100 flex-wrap">
+                        <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"><input type="checkbox" id="kunci-soal-pilih-semua" onchange="pilihSemuaKunciSoal(this.checked)" class="rounded text-primary-600"> Pilih semua yang tampil</label>
+                        <span id="kunci-soal-info-pilih" class="text-[11px] text-slate-500"></span>
+                    </div>
+                    <div id="kunci-soal-list-pilih" class="max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="kunciSoalTerpilih()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-lock mr-1"></i> Kunci Mapel Terpilih</button>
+                </div>
+                <div class="border-t border-primary-200 pt-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <h5 class="text-xs font-bold text-slate-900 uppercase">Daftar Mapel yang Sedang Dikunci</h5>
+                            <span id="kunci-soal-badge" class="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold">0 mapel</span>
+                        </div>
+                        <button type="button" onclick="lepasSemuaKunciSoal()" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-700 border border-red-300 text-[11px] font-bold rounded-lg"><i class="fa-solid fa-lock-open mr-1"></i> Lepas Semua Kunci</button>
+                    </div>
+                    <div id="kunci-soal-list-terkunci" class="bg-white border border-primary-200 rounded-lg max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
+                </div>
+            </div>
+
             <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
@@ -2750,7 +2788,7 @@
         'setPesanSiswaNonaktif', 'setModeWaktuPerSoal', 'setSettingValue', 'setSuaraPelanggaranAktif',
         'simpanSuaraPelanggaran', 'hapusSuaraPelanggaran', 'simpanSoal', 'simpanSoalEssay', 'hapusSoal',
         'hapusSoalBulk', 'hapusSoalEssay', 'importSoalBulk', 'hapusRekapNilai', 'hapusSemuaRekapNilai',
-        'editSkorRekapNilai', 'setLinkFolderBackup', 'aturBackupDatabaseAdmin'
+        'editSkorRekapNilai', 'setLinkFolderBackup', 'aturBackupDatabaseAdmin', 'aturKunciSoalMapel'
     ];
     let adminLainAktif = false;          // true = ada admin lain yang masuk lebih dulu
     let adminLainKosongBerturut = 0;     // penahan supaya status tidak "berkedip"
@@ -3025,6 +3063,210 @@
         }).setSettingValue("KELAS_UJIAN_AKTIF", JSON.stringify(pilihan));
     }
 
+
+    // ===== REVISI 140: KUNCI SOAL MAPEL (Pengaturan Ujian > admin; dipatuhi tampilan guru) =====
+    // Setting MAPEL_TERKUNCI_SOAL = JSON array kunci mapel lengkap. Kosong = tidak ada yang dikunci.
+    // Penegakan sebenarnya ada di SERVER (guru tetap ditolak walau tombol disembunyikan).
+    const PESAN_MAPEL_TERKUNCI_FE = "Soal mapel ini sedang DIKUNCI oleh admin (masa ujian). Soal tidak dapat ditambah, diubah, atau dihapus sampai kunci dilepas. Hubungi admin bila perlu perubahan.";
+    const BANNER_KUNCI_SOAL_HTML = '<div class="mb-3 p-3 rounded-xl border border-red-200 bg-red-50 text-red-800 text-xs font-semibold"><i class="fa-solid fa-lock mr-1"></i> Mapel ini sedang <b>DIKUNCI</b> oleh admin selama masa ujian. Soal tidak dapat diubah atau dihapus sampai kunci dilepas.</div>';
+    let kunciSoalDaftar = [];
+    let kunciSoalMapelData = [];
+
+    function kunciSoalNorm(v) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toLowerCase(); }
+    function kunciSoalEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function kunciSoalPecahJurusan(v) { return String(v == null ? '' : v).split(/[,;\/]/).map(x => x.trim()).filter(Boolean); }
+
+    function mapelSoalTerkunci(kunci) {
+        let n = kunciSoalNorm(kunci);
+        return n !== '' && kunciSoalDaftar.some(x => kunciSoalNorm(x) === n);
+    }
+
+    function terapkanSettingKunciSoal(settings) {
+        let raw = settings ? settings.MAPEL_TERKUNCI_SOAL : undefined;
+        let arr = [];
+        if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+            try { let p = JSON.parse(String(raw)); if (Array.isArray(p)) arr = p.map(String); } catch (e) { arr = []; }
+        }
+        let tanda = a => JSON.stringify(a.map(kunciSoalNorm).sort());
+        let berubah = tanda(arr) !== tanda(kunciSoalDaftar);
+        kunciSoalDaftar = arr;
+        renderKartuKunciSoal();
+        if (berubah) segarkanTampilanKunciGuru();
+    }
+
+    // ---------- sisi GURU ----------
+    function labelKunciDropdownGuru() {
+        ['soal-mapel', 'massal-mapel-select', 'filter-bank-soal-mapel', 'essay-mapel-select'].forEach(id => {
+            let sel = document.getElementById(id);
+            if (!sel) return;
+            Array.prototype.forEach.call(sel.options, o => {
+                if (!o.value) return;
+                o.textContent = o.value + (mapelSoalTerkunci(o.value) ? '  \uD83D\uDD12 TERKUNCI' : '');
+            });
+        });
+    }
+
+    function segarkanTampilanKunciGuru() {
+        try {
+            labelKunciDropdownGuru();
+            let daftar = document.getElementById('guru-tab-daftar');
+            if (daftar && !daftar.classList.contains('hidden') && typeof globalGuruSoalsCache !== 'undefined') renderBankSoalGuruFiltered();
+            let essay = document.getElementById('guru-tab-essay');
+            if (essay && !essay.classList.contains('hidden') && typeof globalGuruEssayCache !== 'undefined') renderListSoalEssay();
+        } catch (e) { if (window.console) console.warn('Segarkan tampilan kunci soal gagal:', e); }
+    }
+
+    function tolakJikaMapelTerkunci(kunci) {
+        if (!mapelSoalTerkunci(kunci)) return false;
+        showAlertModal("Mapel Dikunci", PESAN_MAPEL_TERKUNCI_FE);
+        return true;
+    }
+
+    // ---------- sisi ADMIN ----------
+    function muatKartuKunciSoal() {
+        srv.withSuccessHandler(mapels => {
+            kunciSoalMapelData = Array.isArray(mapels) ? mapels : [];
+            isiFilterKunciSoal();
+            renderKartuKunciSoal();
+        }).withFailureHandler(err => {
+            if (window.console) console.warn('Daftar mapel untuk kunci soal gagal dimuat:', err);
+        }).getMapels();
+    }
+
+    function isiFilterKunciSoal() {
+        let selK = document.getElementById('kunci-soal-filter-kelas');
+        let selJ = document.getElementById('kunci-soal-filter-jurusan');
+        if (!selK || !selJ) return;
+        let kelas = [], jurusan = [];
+        kunciSoalMapelData.forEach(m => {
+            let k = String(m.kelas == null ? '' : m.kelas).trim();
+            if (k && kelas.map(kunciSoalNorm).indexOf(kunciSoalNorm(k)) === -1) kelas.push(k);
+            kunciSoalPecahJurusan(m.jurusan).forEach(j => {
+                if (jurusan.map(kunciSoalNorm).indexOf(kunciSoalNorm(j)) === -1) jurusan.push(j);
+            });
+        });
+        kelas.sort((a, b) => a.length - b.length || a.localeCompare(b));
+        jurusan.sort((a, b) => a.localeCompare(b));
+        let kLama = selK.value, jLama = selJ.value;
+        selK.innerHTML = '<option value="">Semua Kelas</option>' + kelas.map(k => '<option value="' + kunciSoalEsc(k) + '">Kelas ' + kunciSoalEsc(k) + '</option>').join('');
+        selJ.innerHTML = '<option value="">Semua Jurusan</option>' + jurusan.map(j => '<option value="' + kunciSoalEsc(j) + '">' + kunciSoalEsc(j) + '</option>').join('');
+        selK.value = kLama; selJ.value = jLama;
+    }
+
+    function kunciMapelDari(m) {
+        return m.uniqueKey || buatKunciMapelFE(m);
+    }
+
+    function renderKartuKunciSoal() {
+        let boxPilih = document.getElementById('kunci-soal-list-pilih');
+        let boxKunci = document.getElementById('kunci-soal-list-terkunci');
+        if (!boxPilih || !boxKunci) return;
+
+        let fk = kunciSoalNorm((document.getElementById('kunci-soal-filter-kelas') || {}).value);
+        let fj = kunciSoalNorm((document.getElementById('kunci-soal-filter-jurusan') || {}).value);
+        let q = kunciSoalNorm((document.getElementById('kunci-soal-cari') || {}).value);
+
+        let tampil = kunciSoalMapelData.filter(m => {
+            if (fk && kunciSoalNorm(m.kelas) !== fk) return false;
+            if (fj && kunciSoalPecahJurusan(m.jurusan).map(kunciSoalNorm).indexOf(fj) === -1) return false;
+            if (q && kunciSoalNorm((m.nama || '') + ' ' + (m.guru || '')).indexOf(q) === -1) return false;
+            return true;
+        });
+
+        if (tampil.length === 0) {
+            boxPilih.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs italic">Tidak ada mapel yang cocok dengan filter.</div>';
+        } else {
+            boxPilih.innerHTML = tampil.map(m => {
+                let kunci = kunciMapelDari(m);
+                let terkunci = mapelSoalTerkunci(kunci);
+                return '<label class="flex items-start gap-2 px-3 py-2 ' + (terkunci ? 'bg-red-50/50' : 'hover:bg-slate-50 cursor-pointer') + '">' +
+                    '<input type="checkbox" class="kunci-soal-cb rounded text-primary-600 mt-0.5" value="' + encodeURIComponent(kunci) + '"' + (terkunci ? ' disabled' : '') + ' onchange="sinkronPilihSemuaKunciSoal()">' +
+                    '<span class="flex-1 min-w-0"><span class="block text-xs font-bold text-slate-800">' + kunciSoalEsc(m.nama) + '</span>' +
+                    '<span class="block text-[10px] text-slate-500">Kelas ' + kunciSoalEsc(m.kelas) + ' &bull; ' + kunciSoalEsc(m.jurusan) + ' &bull; Guru: ' + kunciSoalEsc(m.guru || '-') + '</span></span>' +
+                    (terkunci ? '<span class="shrink-0 bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>' : '') +
+                    '</label>';
+            }).join('');
+        }
+        sinkronPilihSemuaKunciSoal();
+
+        document.getElementById('kunci-soal-badge').innerText = kunciSoalDaftar.length + ' mapel';
+        if (kunciSoalDaftar.length === 0) {
+            boxKunci.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs italic">Belum ada mapel yang dikunci. Guru bebas mengelola soal semua mapel.</div>';
+        } else {
+            boxKunci.innerHTML = kunciSoalDaftar.map(k => {
+                let m = kunciSoalMapelData.find(x => kunciSoalNorm(kunciMapelDari(x)) === kunciSoalNorm(k));
+                let judul = m ? kunciSoalEsc(m.nama) : kunciSoalEsc(k);
+                let info = m
+                    ? 'Kelas ' + kunciSoalEsc(m.kelas) + ' &bull; ' + kunciSoalEsc(m.jurusan) + ' &bull; Guru: ' + kunciSoalEsc(m.guru || '-')
+                    : 'Data mapel tidak ditemukan (mungkin sudah diubah/dihapus). Lepas kunci ini.';
+                return '<div class="flex items-center gap-2 px-3 py-2">' +
+                    '<i class="fa-solid fa-lock text-red-500 text-xs shrink-0"></i>' +
+                    '<div class="flex-1 min-w-0"><div class="text-xs font-bold text-slate-800">' + judul + '</div><div class="text-[10px] text-slate-500">' + info + '</div></div>' +
+                    '<button type="button" onclick="lepasKunciSoal(\'' + encodeURIComponent(k) + '\')" class="shrink-0 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded text-[11px] font-bold"><i class="fa-solid fa-lock-open mr-1"></i>Lepas Kunci</button>' +
+                    '</div>';
+            }).join('');
+        }
+    }
+
+    function sinkronPilihSemuaKunciSoal() {
+        let semua = document.querySelectorAll('.kunci-soal-cb:not(:disabled)');
+        let dipilih = document.querySelectorAll('.kunci-soal-cb:checked');
+        let master = document.getElementById('kunci-soal-pilih-semua');
+        if (master) {
+            master.checked = semua.length > 0 && dipilih.length === semua.length;
+            master.indeterminate = dipilih.length > 0 && dipilih.length < semua.length;
+            master.disabled = semua.length === 0;
+        }
+        let info = document.getElementById('kunci-soal-info-pilih');
+        if (info) info.innerText = dipilih.length + ' dipilih';
+    }
+
+    function pilihSemuaKunciSoal(checked) {
+        document.querySelectorAll('.kunci-soal-cb:not(:disabled)').forEach(cb => { cb.checked = checked; });
+        sinkronPilihSemuaKunciSoal();
+    }
+
+    function kirimAturKunciSoal(aksi, daftar) {
+        showLoading("Menyimpan Pengaturan", "Memperbarui kunci soal mapel...");
+        srv.withSuccessHandler(res => {
+            hideLoading();
+            if (res && Array.isArray(res.daftar)) { kunciSoalDaftar = res.daftar; renderKartuKunciSoal(); }
+            let ok = res && res.status === 'success';
+            showAlertModal(ok ? "Pengaturan Tersimpan" : "Gagal", (res && res.message) || (ok ? "Kunci soal diperbarui." : "Kunci soal gagal diperbarui."));
+        }).withFailureHandler(err => {
+            hideLoading();
+            showAlertModal("Gagal Menyimpan", "Kunci soal belum tersimpan: " + pesanError(err));
+        }).aturKunciSoalMapel(aksi, daftar);
+    }
+
+    function kunciSoalTerpilih() {
+        let daftar = [];
+        document.querySelectorAll('.kunci-soal-cb:checked').forEach(cb => daftar.push(decodeURIComponent(cb.value)));
+        if (daftar.length === 0) {
+            showAlertModal("Belum Ada Mapel Dipilih", "Centang minimal satu mapel yang ingin dikunci.");
+            return;
+        }
+        showConfirmModal("Kunci Soal Mapel", "Kunci soal " + daftar.length + " mapel terpilih? Guru tidak akan bisa menambah, mengubah, menghapus, atau mengimpor soal pada mapel tersebut sampai kunci dilepas.", function () {
+            kirimAturKunciSoal('kunci', daftar);
+        });
+    }
+
+    function lepasKunciSoal(kunciEnc) {
+        let kunci = decodeURIComponent(kunciEnc);
+        showConfirmModal("Lepas Kunci Soal", "Lepas kunci untuk mapel ini? Guru bisa mengedit soalnya lagi.\n\n" + kunci, function () {
+            kirimAturKunciSoal('lepas', [kunci]);
+        });
+    }
+
+    function lepasSemuaKunciSoal() {
+        if (kunciSoalDaftar.length === 0) {
+            showAlertModal("Tidak Ada Kunci", "Belum ada mapel yang dikunci.");
+            return;
+        }
+        showConfirmModal("Lepas Semua Kunci", "Lepas kunci " + kunciSoalDaftar.length + " mapel sekaligus? Semua guru bisa mengedit soal mapelnya lagi.", function () {
+            kirimAturKunciSoal('lepasSemua', []);
+        });
+    }
 
     // Saklar FAQ Pintar keseluruhan (Pengaturan Ujian > admin). Default tampil.
     let isFaqPintarAktif = true;
@@ -5120,6 +5362,7 @@ let mapelDipilih = activeFoundMapelObj;
         } else if (tab === 'periode') {
             loadActiveExamPeriodAdmin();
             muatStatusCacheSoal();
+            muatKartuKunciSoal();   // REVISI 140
         } else if (tab === 'akun-token') {
             loadKredensialAdminDanToken();
         } else if (tab === 'tampilan') {
@@ -6898,6 +7141,7 @@ let mapelDipilih = activeFoundMapelObj;
     // Saklar fitur panel guru: tab DKN + kolom/tombol Edit di Rekap Nilai.
     // Nilai kosong/tidak ada (sheet lama) = aktif.
     function terapkanSettingGuruFitur(settings) {
+        terapkanSettingKunciSoal(settings);   // REVISI 140
         let vd = settings ? settings.DKN_GURU_AKTIF : undefined;
         let ve = settings ? settings.REKAP_EDIT_GURU_AKTIF : undefined;
         let dknLama = isGuruDknAktif, editLama = isGuruEditRekapAktif;
@@ -8391,6 +8635,7 @@ let mapelDipilih = activeFoundMapelObj;
                     });
                 }
 
+                labelKunciDropdownGuru();   // REVISI 140: tandai mapel terkunci
                 ambilSoalGuru(1);
             }).getMapels();
         }
@@ -8435,6 +8680,7 @@ let mapelDipilih = activeFoundMapelObj;
 
     let _guruSubInputTerakhir = 'input';
     function bukaInputSoal() {
+        segarkanSaklarGuru();   // REVISI 140: ambil status kunci terbaru
         switchGuruTab(_guruSubInputTerakhir || 'input');
         if (_guruSubInputTerakhir === 'essay') loadSoalEssayGuru();
     }
@@ -8540,6 +8786,7 @@ let mapelDipilih = activeFoundMapelObj;
             return;
         }
         let mapelVal = rawMapel.trim(); // FIX: simpan kunci lengkap, jangan dipotong
+        if (tolakJikaMapelTerkunci(mapelVal)) return;   // REVISI 140
 
         let data = {
             id: document.getElementById('soal-id').value,
@@ -8563,6 +8810,7 @@ let mapelDipilih = activeFoundMapelObj;
         showLoading("Menyimpan Soal", "Menyimpan ke database...");
         panggilSoalAntre('simpanSoal', [data], msg => {
             hideLoading();
+            if (String(msg).indexOf('DIKUNCI') > -1) { showAlertModal("Mapel Dikunci", msg); segarkanSaklarGuru(); return; }   // REVISI 140: form tidak dikosongkan
             showAlertModal("Hasil", msg);
             batalEditSoalLive();
             srv.withSuccessHandler(soals => {
@@ -8593,6 +8841,7 @@ let mapelDipilih = activeFoundMapelObj;
 
     function editSoalFromBank(jsonStr) {
         let s = JSON.parse(decodeURIComponent(jsonStr));
+        if (tolakJikaMapelTerkunci(s.mapel)) return;   // REVISI 140
         switchGuruTab('input');
         document.getElementById('soal-id').value = s.id;
         
@@ -8630,6 +8879,7 @@ let mapelDipilih = activeFoundMapelObj;
     }
 
     function confirmHapusSoalFromBank(mapel, idSoal) {
+        if (tolakJikaMapelTerkunci(mapel)) return;   // REVISI 140
         showConfirmModal("Konfirmasi Hapus Soal", "Yakin ingin menghapus soal ini dari Bank Soal?", function() {
             showLoading("Menghapus", "Menghapus soal...");
             panggilSoalAntre('hapusSoal', [mapel, idSoal], msg => {
@@ -8658,6 +8908,7 @@ let mapelDipilih = activeFoundMapelObj;
             return;
         }
         let mapelVal = rawMapel.trim(); // FIX: kunci lengkap -> soal tidak bocor ke kelas lain
+        if (tolakJikaMapelTerkunci(mapelVal)) return;   // REVISI 140
         let fileInput = document.getElementById('excel-soal-file-input');
 
         if (fileInput.files.length === 0) {
@@ -8712,6 +8963,7 @@ let mapelDipilih = activeFoundMapelObj;
        ================================================================ */
     function loadSoalEssayGuru() {
         if (!currentUser) return;
+        segarkanSaklarGuru();   // REVISI 140
         showLoading("Memuat Soal Essay", "Mengambil data...");
         srv.withSuccessHandler(list => {
             globalGuruEssayCache = list || [];
@@ -8735,6 +8987,7 @@ let mapelDipilih = activeFoundMapelObj;
         }
 
         let filtered = globalGuruEssayCache.filter(s => cocokMapelFE(s.mapel, rawTarget));
+        const terkunci = mapelSoalTerkunci(rawTarget);   // REVISI 140
 
         if (filtered.length === 0) {
             container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs italic">Belum ada soal essay untuk mapel ini.</div>`;
@@ -8761,15 +9014,15 @@ let mapelDipilih = activeFoundMapelObj;
                     </div>
                     ${img}
                     <div class="pt-1 flex justify-end gap-2">
-                        <button onclick="editSoalEssay('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit</button>
-                        <button onclick="confirmHapusSoalEssay('${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>
+                        ${terkunci ? '<span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded font-semibold text-[11px]"><i class="fa-solid fa-lock mr-1"></i>Dikunci admin</span>' : `<button onclick="editSoalEssay('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit</button>
+                        <button onclick="confirmHapusSoalEssay('${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>`}
                     </div>
                 </div>
             `;
         });
 
         html += `</div></div>`;
-        container.innerHTML = html;
+        container.innerHTML = (terkunci ? BANNER_KUNCI_SOAL_HTML : '') + html;
     }
 
     function handleImageUploadEssay(input) {
@@ -8844,10 +9097,12 @@ let mapelDipilih = activeFoundMapelObj;
             showAlertModal("Peringatan", "Pertanyaan essay WAJIB diisi!");
             return;
         }
+        if (tolakJikaMapelTerkunci(data.mapel)) return;   // REVISI 140
 
         showLoading("Menyimpan Soal Essay", "Menyimpan ke database...");
         panggilSoalAntre('simpanSoalEssay', [data], msg => {
             hideLoading();
+            if (String(msg).indexOf('DIKUNCI') > -1) { showAlertModal("Mapel Dikunci", msg); segarkanSaklarGuru(); return; }   // REVISI 140
             showAlertModal("Hasil", msg);
             batalEditSoalEssay();
             loadSoalEssayGuru();
@@ -8859,6 +9114,7 @@ let mapelDipilih = activeFoundMapelObj;
 
     function editSoalEssay(jsonStr) {
         let s = JSON.parse(decodeURIComponent(jsonStr));
+        if (tolakJikaMapelTerkunci(s.mapel)) return;   // REVISI 140
         switchGuruTab('essay');
 
         let selectMapel = document.getElementById('essay-mapel-select');
@@ -8898,6 +9154,8 @@ let mapelDipilih = activeFoundMapelObj;
     }
 
     function confirmHapusSoalEssay(idSoal) {
+        let _se = (globalGuruEssayCache || []).find(x => String(x.id) === String(idSoal));   // REVISI 140
+        if (_se && tolakJikaMapelTerkunci(_se.mapel)) return;
         showConfirmModal("Konfirmasi Hapus", "Yakin ingin menghapus soal essay ini?", function() {
             showLoading("Menghapus", "Menghapus soal essay...");
             panggilSoalAntre('hapusSoalEssay', [idSoal], msg => {
@@ -8913,6 +9171,7 @@ let mapelDipilih = activeFoundMapelObj;
         showLoading("Memuat Bank Soal", "Mengambil data...");
         srv.withSuccessHandler(settings => {
             globalBatasSoalPilganGuru = parseInt(settings.BATAS_SOAL_PILGAN || 0, 10) || 0;
+            terapkanSettingKunciSoal(settings);   // REVISI 140
             srv.withSuccessHandler(soals => {
                 globalGuruSoalsCache = soals;
                 srv.withSuccessHandler(essays => {
@@ -8949,7 +9208,8 @@ let mapelDipilih = activeFoundMapelObj;
             return;
         }
 
-        let html = "";
+        const terkunci = mapelSoalTerkunci(rawTarget);   // REVISI 140
+        let html = terkunci ? BANNER_KUNCI_SOAL_HTML : "";
 
         if (filtered.length > 0) {
             let indikatorBatasSoal = "";
@@ -8995,10 +9255,10 @@ let mapelDipilih = activeFoundMapelObj;
                     ${indikatorBatasSoal}
                     <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                         <span class="font-bold text-primary-700 text-xs uppercase"><i class="fa-solid fa-book text-primary-500 mr-1"></i> ${rawTarget} <span class="normal-case font-medium text-slate-400">(Pilihan Ganda)</span></span>
-                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer bg-slate-100 px-2.5 py-1 rounded-lg">
+                        ${terkunci ? '' : `<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer bg-slate-100 px-2.5 py-1 rounded-lg">
                             <input type="checkbox" id="select-all-soal" onchange="toggleSelectAllSoal(this)" class="rounded text-primary-600 cursor-pointer">
                             Pilih Semua
-                        </label>
+                        </label>`}
                     </div>
                     <div class="space-y-3">
             `;
@@ -9008,7 +9268,7 @@ let mapelDipilih = activeFoundMapelObj;
                 let img = s.gambar ? `<div class="my-1.5"><img src="${s.gambar}" class="max-h-32 rounded border shadow-sm" alt=""></div>` : "";
                 html += `
                     <div class="p-3.5 bg-slate-50/80 border border-slate-200 rounded-xl space-y-2 text-xs hover:bg-slate-50 transition flex items-start gap-3">
-                        <input type="checkbox" class="soal-checkbox mt-1 rounded text-primary-600 cursor-pointer" value="${s.id}" onchange="updateBulkActionState()">
+                        ${terkunci ? '' : `<input type="checkbox" class="soal-checkbox mt-1 rounded text-primary-600 cursor-pointer" value="${s.id}" onchange="updateBulkActionState()">`}
                         <div class="flex-1 space-y-2">
                             <div class="teks-soal hang"><span class="hang-no">${idx + 1}.</span><span class="hang-isi teks-justify">${s.pertanyaan}</span></div>
                             ${img}
@@ -9019,8 +9279,8 @@ let mapelDipilih = activeFoundMapelObj;
                             </div>
                             <div class="pt-1"><span class="teks-kunci-badge inline-block px-2.5 py-1 rounded">Kunci Jawaban: ${s.kunci}</span></div>
                             <div class="pt-1 flex justify-end gap-2">
-                                <button onclick="editSoalFromBank('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit Soal</button>
-                                <button onclick="confirmHapusSoalFromBank('${s.mapel}', '${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>
+                                ${terkunci ? '<span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded font-semibold text-[11px]"><i class="fa-solid fa-lock mr-1"></i>Dikunci admin</span>' : `<button onclick="editSoalFromBank('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit Soal</button>`}
+                                ${terkunci ? '' : `<button onclick="confirmHapusSoalFromBank('${s.mapel}', '${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>`}
                             </div>
                         </div>
                     </div>
@@ -9080,6 +9340,7 @@ let mapelDipilih = activeFoundMapelObj;
 
     function hapusSoalTerpilih() {
         let targetMapel = document.getElementById('filter-bank-soal-mapel').value;
+        if (tolakJikaMapelTerkunci(targetMapel)) return;   // REVISI 140
         let checked = document.querySelectorAll('.soal-checkbox:checked');
         if (checked.length === 0) return;
 
@@ -9993,7 +10254,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Manajemen Guru</b>: tambah, ubah, hapus akun guru dan atur urutan daftar guru.</li>
             <li><b>Manajemen Siswa &amp; Ruang</b>: tambah siswa satuan atau import Excel, atur ruang ujian, acak username/password/token, nonaktifkan atau hapus siswa, dan cetak <b>Kartu Ujian</b>.</li>
             <li><b>Manajemen Mapel</b>: buat mapel, kode mapel, batas kumpul, dan hapus soal per mapel.</li>
-            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, pilihan Kelas Peserta Ujian, folder backup, saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
+            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, pilihan Kelas Peserta Ujian, folder backup, Saklar Kunci Soal Mapel (kunci per kelas/jurusan, daftar mapel terkunci, lepas kunci), saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
             <li><b>Kredensial Admin &amp; Pengawas</b>: ganti username dan password Admin, Pengawas Sekolah, dan Pengawas Ujian.</li>
             <li><b>Tampilan</b>: tema warna aplikasi.</li>
           </ul>` },
@@ -10307,6 +10568,19 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Aktifkan Kolom Edit &amp; Aksi Edit</b>: aktif = Rekap Nilai guru menampilkan kolom Edit dan tombol Edit. Nonaktif = keduanya disembunyikan dan guru tidak bisa menyimpan nilai edit (tombol Hapus tetap ada).</li>
           </ul>
           <div class="faq-tip">Nilai edit yang sudah tersimpan tidak terhapus saat saklar dimatikan.</div>` },
+
+    { id: 'a40', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode', q: 'Bagaimana mengunci soal mapel supaya guru tidak bisa mengedit atau menghapus saat ujian?',
+      k: 'kunci soal mapel guru edit hapus impor ujian berlangsung saklar lepas kunci terkunci filter kelas jurusan centang',
+      a: `<p>Di tab <b>Pengaturan Ujian</b>, gunakan kartu <b>Saklar Kunci Soal Mapel</b>.</p>
+          <ol>
+            <li>Pilih filter <b>Kelas</b> dan <b>Jurusan</b> (atau cari nama mapel/guru) agar daftar mapel menyempit.</li>
+            <li>Centang mapel yang ingin dikunci, atau <b>Pilih semua yang tampil</b>.</li>
+            <li>Tekan <b>Kunci Mapel Terpilih</b>.</li>
+          </ol>
+          <p>Pada mapel terkunci, guru tidak bisa menambah, mengubah, menghapus, atau mengimpor soal (pilihan ganda dan essay). Tombol Edit/Hapus disembunyikan dan server juga menolak. Soal yang sudah ada tetap dipakai ujian dan admin tidak terpengaruh.</p>
+          <p>Untuk membuka kembali, lihat <b>Daftar Mapel yang Sedang Dikunci</b> lalu tekan <b>Lepas Kunci</b> pada mapelnya, atau <b>Lepas Semua Kunci</b>.</p>
+          <div class="faq-tip">Kalau nama, kelas, atau jurusan mapel diedit, kunci ikut pindah. Kalau mapel dihapus, kuncinya otomatis dibuang.</div>` },
+
 
     { id: 'a27', r: 'admin', c: 'Kredensial', ctx: 'admin:akun-token', go: 'admin:akun-token', pop: 1, q: 'Bagaimana mengganti username/password Admin, Pengawas Sekolah, dan Pengawas Ujian?',
       k: 'kredensial ganti password admin pengawas sekolah pengawas ujian peninjau soal live monitor update akun',
