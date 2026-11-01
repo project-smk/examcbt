@@ -1546,142 +1546,62 @@
         </div>
 
         <div id="admin-subtab-periode" class="hidden space-y-6">
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-floppy-disk text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Simpan Draf Jawaban Ujian</h4>
-                        <p class="text-xs text-slate-600">Mengamankan draf jawaban siswa saat ter-logout / relogin.</p>
-                    </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
-                    <input type="checkbox" id="toggle-auto-save-draft" onchange="toggleSettingAutoSave(this.checked)" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
+            <!-- SUB-MENU PENGATURAN UJIAN: Jadwal & Waktu | Aturan Ujian | Akses, Kunci & Panel Guru | Data & Sistem -->
+            <div id="pengaturan-subbar" class="flex flex-wrap gap-2">
+                <button type="button" onclick="switchPengaturanSub('jadwal')" id="pengsub-btn-jadwal" class="subtab-btn subtab-btn-active"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Jadwal &amp; Waktu</button>
+                <button type="button" onclick="switchPengaturanSub('aturan')" id="pengsub-btn-aturan" class="subtab-btn"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Aturan Ujian</button>
+                <button type="button" onclick="switchPengaturanSub('akses')" id="pengsub-btn-akses" class="subtab-btn"><i class="fa-solid fa-lock" aria-hidden="true"></i>Akses, Kunci &amp; Panel Guru</button>
+                <button type="button" onclick="switchPengaturanSub('sistem')" id="pengsub-btn-sistem" class="subtab-btn"><i class="fa-solid fa-database" aria-hidden="true"></i>Data &amp; Sistem</button>
             </div>
+            <div id="pengaturan-panel-jadwal" class="space-y-6">
 
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-school text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Kelas Peserta Ujian</h4>
-                        <p class="text-xs text-slate-600">Pilih kelas/jurusan yang boleh melaksanakan ujian. Siswa dari kelas yang tidak dicentang tidak bisa membuka mapel maupun memulai ujian. Centang <b>Seluruh Kelas</b> untuk memilih semua jurusan pada kelas tersebut.</p>
-                    </div>
+            <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
+                <div>
+                    <h3 class="font-bold text-primary-900 text-sm mb-1"><i class="fa-solid fa-sliders text-primary-600 mr-1"></i> Kontrol Periode Ujian Aktif</h3>
+                    <p class="text-xs text-primary-700">Isi <b>tanggal mulai</b> tiap periode (tanggal dan bulan saja, tanpa tahun). Periode aktif berganti otomatis: begitu tanggal mulai sebuah periode tiba, periode itu aktif sampai tanggal mulai periode berikutnya. Jadwal ini berulang setiap tahun, jadi cukup diisi sekali. Periode ditampilkan sebagai pemberitahuan kepada siswa, guru, dan pengawas serta menjadi penanda periode pada nilai yang masuk. Pengaturan ini tidak membatasi/menyaring mata pelajaran yang bisa diakses.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
-                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-X" onchange="toggleTingkatKelasUjian('X', this.checked)" class="rounded text-primary-600"> Seluruh Kelas X</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-AKL" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> AKL</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-MPLB" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> MPLB</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-TJKT" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> TJKT</label>
-                    </div>
-                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
-                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XI" onchange="toggleTingkatKelasUjian('XI', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XI</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-AKL" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> AKL</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-MPLB" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> MPLB</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-TJKT" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> TJKT</label>
-                    </div>
-                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
-                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XII" onchange="toggleTingkatKelasUjian('XII', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XII</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-AKL" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> AKL</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-MPLB" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> MPLB</label>
-                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-TJKT" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> TJKT</label>
-                    </div>
-                </div>
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <p id="kelas-ujian-ringkasan" class="text-xs text-slate-600"></p>
-                    <button type="button" onclick="simpanKelasUjian()" class="shrink-0 self-end sm:self-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Kelas Peserta Ujian</button>
-                </div>
-            </div>
 
-            <!-- REVISI 140: SAKLAR KUNCI SOAL MAPEL -->
-            <div id="card-kunci-soal-mapel" class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-lock text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Saklar Kunci Soal Mapel</h4>
-                        <p class="text-xs text-slate-600">Kunci mapel selama ujian berlangsung. Pada mapel yang dikunci, <b>guru tidak bisa menambah, mengubah, menghapus, maupun mengimpor soal</b> (pilihan ganda dan essay). Soal yang sudah ada tetap dipakai ujian. Admin tidak terpengaruh. Gunakan filter kelas dan jurusan, centang mapel yang ingin dikunci, lalu tekan <b>Kunci Mapel Terpilih</b>.</p>
-                    </div>
+                <div class="bg-white p-4 rounded-xl border border-primary-100 shadow-sm text-xs">
+                    <h4 class="text-sm font-bold text-slate-900">Periode aktif saat ini: <span id="lbl-admin-periode-sekarang" class="text-primary-700">Memuat...</span></h4>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <select id="kunci-soal-filter-kelas" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Kelas</option></select>
-                    <select id="kunci-soal-filter-jurusan" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Jurusan</option></select>
-                    <input type="text" id="kunci-soal-cari" oninput="renderKartuKunciSoal()" placeholder="Cari nama mapel / guru..." class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900">
-                </div>
-                <div class="bg-white border border-primary-200 rounded-lg">
-                    <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-primary-100 flex-wrap">
-                        <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"><input type="checkbox" id="kunci-soal-pilih-semua" onchange="pilihSemuaKunciSoal(this.checked)" class="rounded text-primary-600"> Pilih semua yang tampil</label>
-                        <span id="kunci-soal-info-pilih" class="text-[11px] text-slate-500"></span>
-                    </div>
-                    <div id="kunci-soal-list-pilih" class="max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" onclick="kunciSoalTerpilih()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-lock mr-1"></i> Kunci Mapel Terpilih</button>
-                </div>
-                <div class="border-t border-primary-200 pt-4 space-y-3">
-                    <div class="flex items-center justify-between gap-2 flex-wrap">
+
+                <div class="bg-white p-4 rounded-xl border border-primary-100 shadow-sm space-y-3 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-x-3 gap-y-2 items-center">
+                        <div class="hidden sm:block font-bold text-slate-500 uppercase text-[10px]">Periode</div>
+                        <div class="hidden sm:block font-bold text-slate-500 uppercase text-[10px]">Tanggal mulai (tgl / bulan)</div>
+
+                        <div class="font-bold text-slate-800">Mid Semester Ganjil <span class="block font-medium text-[10px] text-slate-400">Ujian Tengah Semester 1</span></div>
                         <div class="flex items-center gap-2">
-                            <h5 class="text-xs font-bold text-slate-900 uppercase">Daftar Mapel yang Sedang Dikunci</h5>
-                            <span id="kunci-soal-badge" class="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold">0 mapel</span>
+                            <select id="pj-hari-0" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                            <select id="pj-bulan-0" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
                         </div>
-                        <button type="button" onclick="lepasSemuaKunciSoal()" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-700 border border-red-300 text-[11px] font-bold rounded-lg"><i class="fa-solid fa-lock-open mr-1"></i> Lepas Semua Kunci</button>
-                    </div>
-                    <div id="kunci-soal-list-terkunci" class="bg-white border border-primary-200 rounded-lg max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
-                </div>
-            </div>
 
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-circle-question text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Tampilkan FAQ Pintar</h4>
-                        <p class="text-xs text-slate-600">Aktif = tombol FAQ Pintar (pojok kiri bawah) tampil untuk Admin, Guru, Pengawas Sekolah, dan Pengawas Ujian. Nonaktif = FAQ Pintar disembunyikan seluruhnya. Akun Siswa tidak pernah menampilkan FAQ Pintar, apa pun pengaturan ini.</p>
-                    </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
-                    <input type="checkbox" id="toggle-faq-pintar" checked onchange="toggleSettingFaqPintar(this.checked)" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
-            </div>
+                        <div class="font-bold text-slate-800">Semester Ganjil <span class="block font-medium text-[10px] text-slate-400">Ujian Akhir Semester 1</span></div>
+                        <div class="flex items-center gap-2">
+                            <select id="pj-hari-1" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                            <select id="pj-bulan-1" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                        </div>
 
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-table-list text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Aktifkan Tab Menu DKN (Panel Guru)</h4>
-                        <p class="text-xs text-slate-600">Aktif = tab <b>DKN</b> tampil di Panel Guru. Nonaktif = tab DKN disembunyikan dari semua guru dan data DKN tidak bisa diambil oleh guru. Admin tidak terpengaruh.</p>
-                    </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
-                    <input type="checkbox" id="toggle-guru-dkn" checked onchange="toggleSettingGuruDkn(this.checked)" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
-            </div>
+                        <div class="font-bold text-slate-800">Mid Semester Genap <span class="block font-medium text-[10px] text-slate-400">Ujian Tengah Semester 2</span></div>
+                        <div class="flex items-center gap-2">
+                            <select id="pj-hari-2" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                            <select id="pj-bulan-2" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                        </div>
 
-            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
-                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        <div class="font-bold text-slate-800">Semester Genap <span class="block font-medium text-[10px] text-slate-400">Ujian Akhir Semester 2</span></div>
+                        <div class="flex items-center gap-2">
+                            <select id="pj-hari-3" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                            <select id="pj-bulan-3" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900">Aktifkan Kolom Edit &amp; Aksi Edit (Rekap Nilai Guru)</h4>
-                        <p class="text-xs text-slate-600">Aktif = tab Rekap Nilai Siswa di Panel Guru menampilkan <b>kolom Edit</b> dan tombol <b>Edit</b> pada kolom Aksi. Nonaktif = keduanya disembunyikan dan guru tidak bisa menyimpan nilai edit (tombol Hapus tetap ada). Nilai edit yang sudah tersimpan tidak dihapus.</p>
-                    </div>
+                    <p class="text-[11px] text-slate-500">Contoh: Mid Semester Ganjil mulai 1 Juli dan Semester Ganjil mulai 1 Oktober. Pada 1 Oktober periode otomatis berganti ke Semester Ganjil. Kosongkan (pilih &ldquo;-&rdquo;) bila sebuah periode tidak dipakai. Isi minimal satu periode, dan tiap periode harus memakai tanggal mulai yang berbeda.</p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
-                    <input type="checkbox" id="toggle-guru-edit-rekap" checked onchange="toggleSettingGuruEditRekap(this.checked)" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
+
+                <div class="text-right">
+                    <button onclick="simpanPeriodeAktif()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
+                        Simpan Pengaturan Periode
+                    </button>
+                </div>
             </div>
 
             <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
@@ -1724,6 +1644,8 @@
                 <p id="lbl-info-maks-detik-per-soal" class="text-[11px] text-slate-600"></p>
                 <p id="lbl-info-kunci-mode-waktu" class="text-[11px] font-semibold text-amber-700 hidden"></p>
             </div>
+            </div>
+            <div id="pengaturan-panel-aturan" class="hidden space-y-6">
 
             <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
                 <div>
@@ -1737,29 +1659,6 @@
                 <div class="text-right">
                     <button onclick="simpanToleransiTabAdmin()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
                         Simpan Durasi Toleransi Tab
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
-                <div>
-                    <h3 class="font-bold text-primary-900 text-sm mb-1"><i class="fa-solid fa-bolt text-primary-600 mr-1"></i> Siapkan Cache Soal Sebelum Ujian</h3>
-                    <p class="text-xs text-primary-700">Jalankan <b>sebelum ujian dimulai</b> supaya ratusan siswa yang menekan Mulai Ujian bersamaan tidak membuat server membaca sheet Soal berulang-ulang. Aman dijalankan kapan saja, termasuk saat ujian sedang berjalan.</p>
-                </div>
-                <div id="status-cache-soal" class="text-xs text-primary-700">Memeriksa status cache...</div>
-                <div class="border-t border-primary-200 pt-3 space-y-1">
-                    <div class="text-xs font-bold text-primary-900"><i class="fa-solid fa-clock text-primary-600 mr-1"></i> Cache Otomatis (trigger harian)</div>
-                    <div id="status-cache-otomatis" class="text-xs text-primary-700">Memeriksa jadwal otomatis...</div>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                    <button onclick="muatStatusCacheSoal()" class="bg-white hover:bg-primary-100 text-primary-800 border border-primary-300 font-bold px-6 py-2.5 rounded-lg text-xs transition">
-                        Periksa Status
-                    </button>
-                    <button id="btn-cache-otomatis" onclick="aturCacheOtomatis()" class="bg-white hover:bg-primary-100 text-primary-800 border border-primary-300 font-bold px-6 py-2.5 rounded-lg text-xs transition">
-                        Aktifkan Cache Otomatis
-                    </button>
-                    <button onclick="jalankanSiapkanCacheSoal()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
-                        Siapkan Cache Soal
                     </button>
                 </div>
             </div>
@@ -1852,6 +1751,114 @@
                     </button>
                 </div>
             </div>
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-floppy-disk text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Simpan Draf Jawaban Ujian</h4>
+                        <p class="text-xs text-slate-600">Mengamankan draf jawaban siswa saat ter-logout / relogin.</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+                    <input type="checkbox" id="toggle-auto-save-draft" onchange="toggleSettingAutoSave(this.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+            </div>
+            <div id="pengaturan-panel-akses" class="hidden space-y-6">
+
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-school text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Kelas Peserta Ujian</h4>
+                        <p class="text-xs text-slate-600">Pilih kelas/jurusan yang boleh melaksanakan ujian. Siswa dari kelas yang tidak dicentang tidak bisa membuka mapel maupun memulai ujian. Centang <b>Seluruh Kelas</b> untuk memilih semua jurusan pada kelas tersebut.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-X" onchange="toggleTingkatKelasUjian('X', this.checked)" class="rounded text-primary-600"> Seluruh Kelas X</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-AKL" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-MPLB" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-X-TJKT" onchange="sinkronMasterKelasUjian('X')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XI" onchange="toggleTingkatKelasUjian('XI', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XI</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-AKL" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-MPLB" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XI-TJKT" onchange="sinkronMasterKelasUjian('XI')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-900 cursor-pointer"><input type="checkbox" id="kelas-ujian-master-XII" onchange="toggleTingkatKelasUjian('XII', this.checked)" class="rounded text-primary-600"> Seluruh Kelas XII</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-AKL" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> AKL</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-MPLB" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> MPLB</label>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pl-6"><input type="checkbox" id="kelas-ujian-XII-TJKT" onchange="sinkronMasterKelasUjian('XII')" class="rounded text-primary-600"> TJKT</label>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p id="kelas-ujian-ringkasan" class="text-xs text-slate-600"></p>
+                    <button type="button" onclick="simpanKelasUjian()" class="shrink-0 self-end sm:self-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Kelas Peserta Ujian</button>
+                </div>
+            </div>
+
+            <!-- REVISI 140: SAKLAR KUNCI SOAL MAPEL -->
+            <div id="card-kunci-soal-mapel" class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl shadow-sm space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-lock text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Saklar Kunci Soal Mapel</h4>
+                        <p class="text-xs text-slate-600">Kunci mapel selama ujian berlangsung. Pada mapel yang dikunci, <b>guru tidak bisa menambah, mengubah, menghapus, maupun mengimpor soal</b> (pilihan ganda dan essay). Soal yang sudah ada tetap dipakai ujian. Admin tidak terpengaruh. Gunakan filter kelas dan jurusan, centang mapel, lalu pilih: <b>Kunci Sekarang</b> atau <b>Jadwalkan Kunci Otomatis</b> pada tanggal yang dipilih (terkunci sendiri mulai pukul 00:00 WIB tanggal itu, tanpa perlu admin membuka aplikasi).</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <select id="kunci-soal-filter-kelas" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Kelas</option></select>
+                    <select id="kunci-soal-filter-jurusan" onchange="renderKartuKunciSoal()" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900"><option value="">Semua Jurusan</option></select>
+                    <input type="text" id="kunci-soal-cari" oninput="renderKartuKunciSoal()" placeholder="Cari nama mapel / guru..." class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900">
+                </div>
+                <div class="bg-white border border-primary-200 rounded-lg">
+                    <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-primary-100 flex-wrap">
+                        <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"><input type="checkbox" id="kunci-soal-pilih-semua" onchange="pilihSemuaKunciSoal(this.checked)" class="rounded text-primary-600"> Pilih semua yang tampil</label>
+                        <span id="kunci-soal-info-pilih" class="text-[11px] text-slate-500"></span>
+                    </div>
+                    <div id="kunci-soal-list-pilih" class="max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
+                </div>
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+                    <div class="bg-white border border-primary-200 rounded-lg p-3 flex flex-wrap items-end gap-2">
+                        <div>
+                            <label for="kunci-soal-tanggal" class="block text-[11px] font-bold text-slate-700 mb-1"><i class="fa-solid fa-calendar-day text-primary-600 mr-1"></i> Terkunci otomatis mulai tanggal</label>
+                            <input type="date" id="kunci-soal-tanggal" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white font-bold text-primary-900">
+                        </div>
+                        <button type="button" onclick="jadwalkanKunciSoalTerpilih()" class="px-4 py-2 bg-white hover:bg-primary-50 text-primary-800 border border-primary-400 text-xs font-bold rounded-lg shadow-sm"><i class="fa-solid fa-calendar-check mr-1"></i> Jadwalkan Kunci Otomatis</button>
+                    </div>
+                    <button type="button" onclick="kunciSoalTerpilih()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-lock mr-1"></i> Kunci Sekarang (Mapel Terpilih)</button>
+                </div>
+                <div class="border-t border-primary-200 pt-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <h5 class="text-xs font-bold text-slate-900 uppercase">Daftar Mapel yang Sedang Dikunci</h5>
+                            <span id="kunci-soal-badge" class="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold">0 mapel</span>
+                        </div>
+                        <button type="button" onclick="lepasSemuaKunciSoal()" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-700 border border-red-300 text-[11px] font-bold rounded-lg"><i class="fa-solid fa-lock-open mr-1"></i> Lepas Semua Kunci</button>
+                    </div>
+                    <div id="kunci-soal-list-terkunci" class="bg-white border border-primary-200 rounded-lg max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
+                </div>
+                <div class="border-t border-primary-200 pt-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <h5 class="text-xs font-bold text-slate-900 uppercase">Jadwal Kunci Otomatis (Belum Tiba)</h5>
+                            <span id="kunci-soal-badge-jadwal" class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold">0 mapel</span>
+                        </div>
+                        <button type="button" onclick="batalSemuaJadwalKunciSoal()" class="px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-700 border border-amber-300 text-[11px] font-bold rounded-lg"><i class="fa-solid fa-calendar-xmark mr-1"></i> Batalkan Semua Jadwal</button>
+                    </div>
+                    <div id="kunci-soal-list-jadwal" class="bg-white border border-primary-200 rounded-lg max-h-72 overflow-y-auto divide-y divide-slate-100"></div>
+                </div>
+            </div>
 
             <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
                 <div>
@@ -1862,6 +1869,79 @@
                 <div class="text-right">
                     <button onclick="simpanPesanNonaktifAdmin()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
                         Simpan Pesan
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-circle-question text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Tampilkan FAQ Pintar</h4>
+                        <p class="text-xs text-slate-600">Aktif = tombol FAQ Pintar (pojok kiri bawah) tampil untuk Admin, Guru, Pengawas Sekolah, dan Pengawas Ujian. Nonaktif = FAQ Pintar disembunyikan seluruhnya. Akun Siswa tidak pernah menampilkan FAQ Pintar, apa pun pengaturan ini.</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+                    <input type="checkbox" id="toggle-faq-pintar" checked onchange="toggleSettingFaqPintar(this.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-table-list text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Aktifkan Tab Menu DKN (Panel Guru)</h4>
+                        <p class="text-xs text-slate-600">Aktif = tab <b>DKN</b> tampil di Panel Guru. Nonaktif = tab DKN disembunyikan dari semua guru dan data DKN tidak bisa diambil oleh guru. Admin tidak terpengaruh.</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+                    <input type="checkbox" id="toggle-guru-dkn" checked onchange="toggleSettingGuruDkn(this.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+
+            <div class="bg-primary-50/80 border border-primary-200 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-primary-600 text-white rounded-xl shrink-0 shadow">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Aktifkan Kolom Edit &amp; Aksi Edit (Rekap Nilai Guru)</h4>
+                        <p class="text-xs text-slate-600">Aktif = tab Rekap Nilai Siswa di Panel Guru menampilkan <b>kolom Edit</b> dan tombol <b>Edit</b> pada kolom Aksi. Nonaktif = keduanya disembunyikan dan guru tidak bisa menyimpan nilai edit (tombol Hapus tetap ada). Nilai edit yang sudah tersimpan tidak dihapus.</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+                    <input type="checkbox" id="toggle-guru-edit-rekap" checked onchange="toggleSettingGuruEditRekap(this.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+            </div>
+            <div id="pengaturan-panel-sistem" class="hidden space-y-6">
+
+            <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
+                <div>
+                    <h3 class="font-bold text-primary-900 text-sm mb-1"><i class="fa-solid fa-bolt text-primary-600 mr-1"></i> Siapkan Cache Soal Sebelum Ujian</h3>
+                    <p class="text-xs text-primary-700">Jalankan <b>sebelum ujian dimulai</b> supaya ratusan siswa yang menekan Mulai Ujian bersamaan tidak membuat server membaca sheet Soal berulang-ulang. Aman dijalankan kapan saja, termasuk saat ujian sedang berjalan.</p>
+                </div>
+                <div id="status-cache-soal" class="text-xs text-primary-700">Memeriksa status cache...</div>
+                <div class="border-t border-primary-200 pt-3 space-y-1">
+                    <div class="text-xs font-bold text-primary-900"><i class="fa-solid fa-clock text-primary-600 mr-1"></i> Cache Otomatis (trigger harian)</div>
+                    <div id="status-cache-otomatis" class="text-xs text-primary-700">Memeriksa jadwal otomatis...</div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                    <button onclick="muatStatusCacheSoal()" class="bg-white hover:bg-primary-100 text-primary-800 border border-primary-300 font-bold px-6 py-2.5 rounded-lg text-xs transition">
+                        Periksa Status
+                    </button>
+                    <button id="btn-cache-otomatis" onclick="aturCacheOtomatis()" class="bg-white hover:bg-primary-100 text-primary-800 border border-primary-300 font-bold px-6 py-2.5 rounded-lg text-xs transition">
+                        Aktifkan Cache Otomatis
+                    </button>
+                    <button onclick="jalankanSiapkanCacheSoal()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
+                        Siapkan Cache Soal
                     </button>
                 </div>
             </div>
@@ -1934,54 +2014,6 @@
                     </button>
                 </div>
             </div>
-
-            <div class="bg-primary-50 p-6 rounded-xl border border-primary-200 space-y-4 shadow-sm">
-                <div>
-                    <h3 class="font-bold text-primary-900 text-sm mb-1"><i class="fa-solid fa-sliders text-primary-600 mr-1"></i> Kontrol Periode Ujian Aktif</h3>
-                    <p class="text-xs text-primary-700">Isi <b>tanggal mulai</b> tiap periode (tanggal dan bulan saja, tanpa tahun). Periode aktif berganti otomatis: begitu tanggal mulai sebuah periode tiba, periode itu aktif sampai tanggal mulai periode berikutnya. Jadwal ini berulang setiap tahun, jadi cukup diisi sekali. Periode ditampilkan sebagai pemberitahuan kepada siswa, guru, dan pengawas serta menjadi penanda periode pada nilai yang masuk. Pengaturan ini tidak membatasi/menyaring mata pelajaran yang bisa diakses.</p>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl border border-primary-100 shadow-sm text-xs">
-                    <h4 class="text-sm font-bold text-slate-900">Periode aktif saat ini: <span id="lbl-admin-periode-sekarang" class="text-primary-700">Memuat...</span></h4>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl border border-primary-100 shadow-sm space-y-3 text-xs">
-                    <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-x-3 gap-y-2 items-center">
-                        <div class="hidden sm:block font-bold text-slate-500 uppercase text-[10px]">Periode</div>
-                        <div class="hidden sm:block font-bold text-slate-500 uppercase text-[10px]">Tanggal mulai (tgl / bulan)</div>
-
-                        <div class="font-bold text-slate-800">Mid Semester Ganjil <span class="block font-medium text-[10px] text-slate-400">Ujian Tengah Semester 1</span></div>
-                        <div class="flex items-center gap-2">
-                            <select id="pj-hari-0" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                            <select id="pj-bulan-0" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                        </div>
-
-                        <div class="font-bold text-slate-800">Semester Ganjil <span class="block font-medium text-[10px] text-slate-400">Ujian Akhir Semester 1</span></div>
-                        <div class="flex items-center gap-2">
-                            <select id="pj-hari-1" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                            <select id="pj-bulan-1" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                        </div>
-
-                        <div class="font-bold text-slate-800">Mid Semester Genap <span class="block font-medium text-[10px] text-slate-400">Ujian Tengah Semester 2</span></div>
-                        <div class="flex items-center gap-2">
-                            <select id="pj-hari-2" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                            <select id="pj-bulan-2" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                        </div>
-
-                        <div class="font-bold text-slate-800">Semester Genap <span class="block font-medium text-[10px] text-slate-400">Ujian Akhir Semester 2</span></div>
-                        <div class="flex items-center gap-2">
-                            <select id="pj-hari-3" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                            <select id="pj-bulan-3" class="px-3 py-2 border border-primary-300 rounded-lg text-xs bg-white text-primary-900"></select>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-500">Contoh: Mid Semester Ganjil mulai 1 Juli dan Semester Ganjil mulai 1 Oktober. Pada 1 Oktober periode otomatis berganti ke Semester Ganjil. Kosongkan (pilih &ldquo;-&rdquo;) bila sebuah periode tidak dipakai. Isi minimal satu periode, dan tiap periode harus memakai tanggal mulai yang berbeda.</p>
-                </div>
-
-                <div class="text-right">
-                    <button onclick="simpanPeriodeAktif()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
-                        Simpan Pengaturan Periode
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -3069,7 +3101,12 @@
     // Penegakan sebenarnya ada di SERVER (guru tetap ditolak walau tombol disembunyikan).
     const PESAN_MAPEL_TERKUNCI_FE = "Soal mapel ini sedang DIKUNCI oleh admin (masa ujian). Soal tidak dapat ditambah, diubah, atau dihapus sampai kunci dilepas. Hubungi admin bila perlu perubahan.";
     const BANNER_KUNCI_SOAL_HTML = '<div class="mb-3 p-3 rounded-xl border border-red-200 bg-red-50 text-red-800 text-xs font-semibold"><i class="fa-solid fa-lock mr-1"></i> Mapel ini sedang <b>DIKUNCI</b> oleh admin selama masa ujian. Soal tidak dapat diubah atau dihapus sampai kunci dilepas.</div>';
+    // REVISI 141: kunciSoalDaftar = daftar EFEKTIF (manual + jadwal tanggal yang sudah tiba), dihitung SERVER (WIB).
+    // Inilah yang dipakai tampilan guru. kunciSoalManual / kunciSoalJadwal hanya untuk kartu admin.
     let kunciSoalDaftar = [];
+    let kunciSoalManual = [];
+    let kunciSoalJadwal = {};
+    let kunciSoalHariIni = '';
     let kunciSoalMapelData = [];
 
     function kunciSoalNorm(v) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toLowerCase(); }
@@ -3081,18 +3118,48 @@
         return n !== '' && kunciSoalDaftar.some(x => kunciSoalNorm(x) === n);
     }
 
+    function kunciSoalParseArr(raw) {
+        if (raw === undefined || raw === null || String(raw).trim() === '') return null;
+        try { let p = JSON.parse(String(raw)); if (Array.isArray(p)) return p.map(String); } catch (e) {}
+        return [];
+    }
+    function kunciSoalParseJadwal(raw) {
+        let hasil = {};
+        if (raw === undefined || raw === null || String(raw).trim() === '') return hasil;
+        try {
+            let p = JSON.parse(String(raw));
+            if (p && typeof p === 'object' && !Array.isArray(p)) Object.keys(p).forEach(k => { if (/^\d{4}-\d{2}-\d{2}$/.test(String(p[k]))) hasil[k] = String(p[k]); });
+        } catch (e) {}
+        return hasil;
+    }
+    function kunciSoalFormatTanggal(iso) {
+        let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+        return m ? (m[3] + '/' + m[2] + '/' + m[1]) : String(iso || '');
+    }
+
     function terapkanSettingKunciSoal(settings) {
-        let raw = settings ? settings.MAPEL_TERKUNCI_SOAL : undefined;
-        let arr = [];
-        if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
-            try { let p = JSON.parse(String(raw)); if (Array.isArray(p)) arr = p.map(String); } catch (e) { arr = []; }
-        }
+        if (!settings) return;
+        let manual = kunciSoalParseArr(settings.MAPEL_TERKUNCI_SOAL) || [];
+        // REVISI 141: pakai daftar efektif dari server (sudah memperhitungkan tanggal). Server lama tanpa kunci ini = hanya manual.
+        let efektif = kunciSoalParseArr(settings.MAPEL_TERKUNCI_EFEKTIF);
+        let arr = efektif === null ? manual : efektif;
         let tanda = a => JSON.stringify(a.map(kunciSoalNorm).sort());
         let berubah = tanda(arr) !== tanda(kunciSoalDaftar);
         kunciSoalDaftar = arr;
+        kunciSoalManual = manual;
+        kunciSoalJadwal = kunciSoalParseJadwal(settings.MAPEL_KUNCI_JADWAL);
+        if (settings.MAPEL_KUNCI_HARI_INI) kunciSoalHariIni = String(settings.MAPEL_KUNCI_HARI_INI);
+        let inTgl = document.getElementById('kunci-soal-tanggal');
+        if (inTgl && kunciSoalHariIni) inTgl.min = kunciSoalHariIni;
         renderKartuKunciSoal();
         if (berubah) segarkanTampilanKunciGuru();
     }
+
+    // Guru yang membiarkan panelnya terbuka lintas tengah malam: tarik ulang pengaturan tiap 5 menit supaya
+    // kunci otomatis ikut tampil tanpa harus refresh. (Server tetap menolak simpan/hapus walau tombol masih terlihat.)
+    setInterval(function () {
+        try { if (currentUser && currentUser.role === 'guru' && document.visibilityState === 'visible') segarkanSaklarGuru(); } catch (e) {}
+    }, 300000);
 
     // ---------- sisi GURU ----------
     function labelKunciDropdownGuru() {
@@ -3183,13 +3250,21 @@
                     '<input type="checkbox" class="kunci-soal-cb rounded text-primary-600 mt-0.5" value="' + encodeURIComponent(kunci) + '"' + (terkunci ? ' disabled' : '') + ' onchange="sinkronPilihSemuaKunciSoal()">' +
                     '<span class="flex-1 min-w-0"><span class="block text-xs font-bold text-slate-800">' + kunciSoalEsc(m.nama) + '</span>' +
                     '<span class="block text-[10px] text-slate-500">Kelas ' + kunciSoalEsc(m.kelas) + ' &bull; ' + kunciSoalEsc(m.jurusan) + ' &bull; Guru: ' + kunciSoalEsc(m.guru || '-') + '</span></span>' +
-                    (terkunci ? '<span class="shrink-0 bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>' : '') +
+                    (terkunci ? '<span class="shrink-0 bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>'
+                        : (Object.keys(kunciSoalJadwal).some(j => kunciSoalNorm(j) === kunciSoalNorm(kunci))
+                            ? '<span class="shrink-0 bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-calendar-check mr-1"></i>Terjadwal ' + kunciSoalFormatTanggal(kunciSoalJadwal[Object.keys(kunciSoalJadwal).find(j => kunciSoalNorm(j) === kunciSoalNorm(kunci))]) + '</span>' : '')) +
                     '</label>';
             }).join('');
         }
         sinkronPilihSemuaKunciSoal();
 
         document.getElementById('kunci-soal-badge').innerText = kunciSoalDaftar.length + ' mapel';
+        let tglDari = k => {
+            let n = kunciSoalNorm(k), t = null;
+            Object.keys(kunciSoalJadwal).forEach(j => { if (kunciSoalNorm(j) === n) t = kunciSoalJadwal[j]; });
+            return t;
+        };
+        let manualAda = k => kunciSoalManual.some(x => kunciSoalNorm(x) === kunciSoalNorm(k));
         if (kunciSoalDaftar.length === 0) {
             boxKunci.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs italic">Belum ada mapel yang dikunci. Guru bebas mengelola soal semua mapel.</div>';
         } else {
@@ -3199,12 +3274,38 @@
                 let info = m
                     ? 'Kelas ' + kunciSoalEsc(m.kelas) + ' &bull; ' + kunciSoalEsc(m.jurusan) + ' &bull; Guru: ' + kunciSoalEsc(m.guru || '-')
                     : 'Data mapel tidak ditemukan (mungkin sudah diubah/dihapus). Lepas kunci ini.';
+                let tgl = tglDari(k);
+                let sumber = (manualAda(k) ? '<span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1">Manual</span>' : '') +
+                    (tgl ? '<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-calendar-check mr-1"></i>Otomatis sejak ' + kunciSoalFormatTanggal(tgl) + '</span>' : '');
                 return '<div class="flex items-center gap-2 px-3 py-2">' +
                     '<i class="fa-solid fa-lock text-red-500 text-xs shrink-0"></i>' +
-                    '<div class="flex-1 min-w-0"><div class="text-xs font-bold text-slate-800">' + judul + '</div><div class="text-[10px] text-slate-500">' + info + '</div></div>' +
+                    '<div class="flex-1 min-w-0"><div class="text-xs font-bold text-slate-800">' + judul + '</div><div class="text-[10px] text-slate-500">' + info + '</div><div class="mt-0.5">' + sumber + '</div></div>' +
                     '<button type="button" onclick="lepasKunciSoal(\'' + encodeURIComponent(k) + '\')" class="shrink-0 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded text-[11px] font-bold"><i class="fa-solid fa-lock-open mr-1"></i>Lepas Kunci</button>' +
                     '</div>';
             }).join('');
+        }
+
+        // Jadwal yang belum tiba (tanggal > hari ini menurut server)
+        let boxJadwal = document.getElementById('kunci-soal-list-jadwal');
+        if (boxJadwal) {
+            let pending = Object.keys(kunciSoalJadwal).filter(k => !kunciSoalHariIni || kunciSoalJadwal[k] > kunciSoalHariIni)
+                .sort((a, b) => kunciSoalJadwal[a].localeCompare(kunciSoalJadwal[b]) || a.localeCompare(b));
+            document.getElementById('kunci-soal-badge-jadwal').innerText = pending.length + ' mapel';
+            if (pending.length === 0) {
+                boxJadwal.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs italic">Belum ada jadwal kunci otomatis.</div>';
+            } else {
+                boxJadwal.innerHTML = pending.map(k => {
+                    let m = kunciSoalMapelData.find(x => kunciSoalNorm(kunciMapelDari(x)) === kunciSoalNorm(k));
+                    let judul = m ? kunciSoalEsc(m.nama) : kunciSoalEsc(k);
+                    let info = m ? 'Kelas ' + kunciSoalEsc(m.kelas) + ' &bull; ' + kunciSoalEsc(m.jurusan) + ' &bull; Guru: ' + kunciSoalEsc(m.guru || '-') : 'Data mapel tidak ditemukan.';
+                    return '<div class="flex items-center gap-2 px-3 py-2">' +
+                        '<i class="fa-solid fa-calendar-day text-amber-500 text-xs shrink-0"></i>' +
+                        '<div class="flex-1 min-w-0"><div class="text-xs font-bold text-slate-800">' + judul + '</div><div class="text-[10px] text-slate-500">' + info + '</div>' +
+                        '<div class="mt-0.5"><span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-bold">Terkunci otomatis mulai ' + kunciSoalFormatTanggal(kunciSoalJadwal[k]) + ' (00:00 WIB)</span></div></div>' +
+                        '<button type="button" onclick="batalJadwalKunciSoal(\'' + encodeURIComponent(k) + '\')" class="shrink-0 px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-700 border border-amber-300 rounded text-[11px] font-bold"><i class="fa-solid fa-xmark mr-1"></i>Batalkan</button>' +
+                        '</div>';
+                }).join('');
+            }
         }
     }
 
@@ -3226,17 +3327,23 @@
         sinkronPilihSemuaKunciSoal();
     }
 
-    function kirimAturKunciSoal(aksi, daftar) {
+    function kirimAturKunciSoal(aksi, daftar, tanggal) {
         showLoading("Menyimpan Pengaturan", "Memperbarui kunci soal mapel...");
         srv.withSuccessHandler(res => {
             hideLoading();
-            if (res && Array.isArray(res.daftar)) { kunciSoalDaftar = res.daftar; renderKartuKunciSoal(); }
+            if (res && Array.isArray(res.daftar)) {
+                kunciSoalManual = res.daftar;
+                kunciSoalJadwal = (res.jadwal && typeof res.jadwal === 'object') ? res.jadwal : {};
+                kunciSoalDaftar = Array.isArray(res.efektif) ? res.efektif : res.daftar;
+                if (res.hariIni) kunciSoalHariIni = String(res.hariIni);
+                renderKartuKunciSoal();
+            }
             let ok = res && res.status === 'success';
             showAlertModal(ok ? "Pengaturan Tersimpan" : "Gagal", (res && res.message) || (ok ? "Kunci soal diperbarui." : "Kunci soal gagal diperbarui."));
         }).withFailureHandler(err => {
             hideLoading();
             showAlertModal("Gagal Menyimpan", "Kunci soal belum tersimpan: " + pesanError(err));
-        }).aturKunciSoalMapel(aksi, daftar);
+        }).aturKunciSoalMapel(aksi, daftar, tanggal || '');
     }
 
     function kunciSoalTerpilih() {
@@ -3251,9 +3358,47 @@
         });
     }
 
+    function jadwalkanKunciSoalTerpilih() {
+        let daftar = [];
+        document.querySelectorAll('.kunci-soal-cb:checked').forEach(cb => daftar.push(decodeURIComponent(cb.value)));
+        if (daftar.length === 0) {
+            showAlertModal("Belum Ada Mapel Dipilih", "Centang minimal satu mapel yang ingin dijadwalkan kunci otomatisnya.");
+            return;
+        }
+        let tgl = (document.getElementById('kunci-soal-tanggal') || {}).value || '';
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(tgl)) {
+            showAlertModal("Tanggal Belum Dipilih", "Pilih tanggal mulai terkunci otomatis terlebih dahulu.");
+            return;
+        }
+        let langsung = kunciSoalHariIni && tgl <= kunciSoalHariIni;
+        let teks = "Jadwalkan " + daftar.length + " mapel terpilih terkunci otomatis mulai " + kunciSoalFormatTanggal(tgl) + " pukul 00:00 WIB? " +
+            (langsung ? "Tanggal tersebut sudah tiba, jadi mapel akan LANGSUNG terkunci. " : "Sebelum tanggal itu guru masih bisa mengedit soal. ") +
+            "Kunci berlaku seterusnya sampai Anda melepasnya.";
+        showConfirmModal("Jadwalkan Kunci Otomatis", teks, function () {
+            kirimAturKunciSoal('jadwal', daftar, tgl);
+        });
+    }
+
+    function batalJadwalKunciSoal(kunciEnc) {
+        let kunci = decodeURIComponent(kunciEnc);
+        showConfirmModal("Batalkan Jadwal Kunci", "Batalkan jadwal kunci otomatis untuk mapel ini?\n\n" + kunci, function () {
+            kirimAturKunciSoal('batalJadwal', [kunci]);
+        });
+    }
+
+    function batalSemuaJadwalKunciSoal() {
+        if (Object.keys(kunciSoalJadwal).length === 0) {
+            showAlertModal("Tidak Ada Jadwal", "Belum ada jadwal kunci otomatis.");
+            return;
+        }
+        showConfirmModal("Batalkan Semua Jadwal", "Batalkan semua jadwal kunci otomatis? Mapel yang sudah terkunci karena jadwalnya tiba tidak ikut dilepas; gunakan Lepas Kunci untuk itu.", function () {
+            kirimAturKunciSoal('batalSemuaJadwal', []);
+        });
+    }
+
     function lepasKunciSoal(kunciEnc) {
         let kunci = decodeURIComponent(kunciEnc);
-        showConfirmModal("Lepas Kunci Soal", "Lepas kunci untuk mapel ini? Guru bisa mengedit soalnya lagi.\n\n" + kunci, function () {
+        showConfirmModal("Lepas Kunci Soal", "Lepas kunci untuk mapel ini? Guru bisa mengedit soalnya lagi. Bila terkunci otomatis oleh jadwal tanggal, jadwalnya ikut dihapus.\n\n" + kunci, function () {
             kirimAturKunciSoal('lepas', [kunci]);
         });
     }
@@ -5320,6 +5465,27 @@ let mapelDipilih = activeFoundMapelObj;
     }
 
     let _adminSubManajTerakhir = 'guru';
+
+    // ---------- Sub tab di dalam "Pengaturan Ujian" (4 sub tab) ----------
+    // Semua kartu tetap ada di halaman (hanya disembunyikan), jadi pengisian dan penyimpanan
+    // pengaturan lewat id elemen tidak berubah. Sub tab terakhir dibuka diingat selama halaman terbuka.
+    const PENGATURAN_SUB = ['jadwal', 'aturan', 'akses', 'sistem'];
+    let _pengaturanSubTerakhir = 'jadwal';
+    function switchPengaturanSub(kunci) {
+        if (PENGATURAN_SUB.indexOf(kunci) === -1) kunci = 'jadwal';
+        _pengaturanSubTerakhir = kunci;
+        PENGATURAN_SUB.forEach(k => {
+            let panel = document.getElementById('pengaturan-panel-' + k);
+            let btn = document.getElementById('pengsub-btn-' + k);
+            if (panel) panel.classList.toggle('hidden', k !== kunci);
+            if (btn) btn.className = 'subtab-btn' + (k === kunci ? ' subtab-btn-active' : '');
+        });
+    }
+    // Dipakai pintasan FAQ: buka Pengaturan Ujian langsung di sub tab tertentu.
+    function bukaPengaturanSub(kunci) {
+        switchAdminMainTab('periode');
+        switchPengaturanSub(kunci);
+    }
     function bukaManajemenAdmin() { switchAdminMainTab(_adminSubManajTerakhir || 'guru'); }
 
     function switchAdminMainTab(tab) {
@@ -5360,6 +5526,7 @@ let mapelDipilih = activeFoundMapelObj;
         } else if (tab === 'profil') {
             loadProfilSiswa();
         } else if (tab === 'periode') {
+            switchPengaturanSub(_pengaturanSubTerakhir || 'jadwal');
             loadActiveExamPeriodAdmin();
             muatStatusCacheSoal();
             muatKartuKunciSoal();   // REVISI 140
@@ -10254,7 +10421,7 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Manajemen Guru</b>: tambah, ubah, hapus akun guru dan atur urutan daftar guru.</li>
             <li><b>Manajemen Siswa &amp; Ruang</b>: tambah siswa satuan atau import Excel, atur ruang ujian, acak username/password/token, nonaktifkan atau hapus siswa, dan cetak <b>Kartu Ujian</b>.</li>
             <li><b>Manajemen Mapel</b>: buat mapel, kode mapel, batas kumpul, dan hapus soal per mapel.</li>
-            <li><b>Pengaturan Ujian</b>: periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, pilihan Kelas Peserta Ujian, folder backup, Saklar Kunci Soal Mapel (kunci per kelas/jurusan, daftar mapel terkunci, lepas kunci), saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
+            <li><b>Pengaturan Ujian</b> (dibagi 4 sub tab: Jadwal &amp; Waktu, Aturan Ujian, Akses, Kunci &amp; Panel Guru, serta Data &amp; Sistem): periode aktif, durasi dan jam ujian, waktu per soal, batas pelanggaran, Batas Soal Pilihan Ganda, cache soal, draf jawaban, pilihan Kelas Peserta Ujian, folder backup, Saklar Kunci Soal Mapel (kunci per kelas/jurusan, daftar mapel terkunci, lepas kunci), saklar dan jam backup sheet database (otomatis harian + tombol Backup Sekarang), saklar FAQ Pintar, tab DKN guru, kolom Edit rekap guru, serta tombol Hapus Semua Rekap Nilai.</li>
             <li><b>Kredensial Admin &amp; Pengawas</b>: ganti username dan password Admin, Pengawas Sekolah, dan Pengawas Ujian.</li>
             <li><b>Tampilan</b>: tema warna aplikasi.</li>
           </ul>` },
@@ -10474,7 +10641,7 @@ let mapelDipilih = activeFoundMapelObj;
       k: 'hapus soal mapel kosongkan bank soal bersihkan log reset soal',
       a: `<p>Di tab <b>Manajemen Mapel</b>, bagian <i>Hapus Log / Soal di Database Sheet per Mapel</i>: pilih mata pelajaran lalu tekan <b>Hapus Soal Mapel Ini</b>. Seluruh soal pilihan ganda dan essay mapel tersebut dihapus permanen, sedangkan data mapelnya tetap ada.</p>` },
 
-    { id: 'a16', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode', pop: 1, q: 'Apa bedanya Durasi Ujian dengan Saklar Waktu Ujian (Jam Mulai - Berakhir)?',
+    { id: 'a16', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:jadwal', pop: 1, q: 'Apa bedanya Durasi Ujian dengan Saklar Waktu Ujian (Jam Mulai - Berakhir)?',
       k: 'saklar waktu ujian jadwal jam mulai jam berakhir durasi menit jendela waktu belum dimulai sudah berakhir',
       a: `<ul>
             <li><b>Nonaktif</b>: tiap mapel memakai <b>Durasi (menit)</b> seperti biasa.</li>
@@ -10483,7 +10650,7 @@ let mapelDipilih = activeFoundMapelObj;
           <p>Jam yang dipakai hanya jam (tanpa tanggal), berlaku sama setiap hari dan untuk semua siswa mapel itu. Ini adalah jendela waktu ujian, <b>bukan</b> batas waktu submit. Di luar jendela, siswa melihat pesan "belum dimulai" atau "sudah berakhir".</p>
           <div class="faq-tip">Saat saklar aktif, Jam Mulai dan Jam Berakhir <b>wajib diisi</b> di setiap mapel, dan Jam Berakhir harus setelah Jam Mulai (tidak boleh melewati tengah malam).</div>` },
 
-    { id: 'a17', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana cara kerja Saklar Waktu Per Soal?',
+    { id: 'a17', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:jadwal', q: 'Bagaimana cara kerja Saklar Waktu Per Soal?',
       k: 'waktu per soal detik otomatis pindah soal tidak bisa kembali timer soal',
       a: `<ul>
             <li>Saat aktif, tiap soal hanya bisa dikerjakan selama <b>N detik</b>. Waktu habis, siswa otomatis pindah ke soal berikutnya dan <b>tidak bisa kembali</b>.</li>
@@ -10492,16 +10659,16 @@ let mapelDipilih = activeFoundMapelObj;
             <li><b>Tidak bisa dipakai bersamaan</b> dengan Saklar Waktu Ujian (Jam Mulai - Berakhir).</li>
           </ul>` },
 
-    { id: 'a18', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Apa itu Durasi Toleransi Pindah Tab dan berapa nilai yang sebaiknya dipakai?',
+    { id: 'a18', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:aturan', q: 'Apa itu Durasi Toleransi Pindah Tab dan berapa nilai yang sebaiknya dipakai?',
       k: 'toleransi pindah tab detik batas keluar layar pelanggaran sensitif',
       a: `<p>Ini batas waktu maksimal (detik) siswa boleh keluar atau pindah tab sebelum sistem mencatat <b>pelanggaran</b>. Isi angka lalu tekan <b>Simpan Durasi Toleransi Tab</b>.</p>
           <p>Nilai kecil membuat deteksi ketat; nilai terlalu kecil bisa menjerat siswa yang tidak sengaja tersentuh notifikasi. Sesuaikan kebijakan sekolah.</p>` },
 
-    { id: 'a19', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', pop: 1, q: 'Bagaimana mengatur batas jumlah pelanggaran sebelum jawaban dikumpulkan otomatis?',
+    { id: 'a19', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:aturan', pop: 1, q: 'Bagaimana mengatur batas jumlah pelanggaran sebelum jawaban dikumpulkan otomatis?',
       k: 'batas pelanggaran maksimal kumpul otomatis paksa submit berapa kali',
       a: `<p>Di <b>Batas Jumlah Pelanggaran per Mapel</b>, isi jumlah kali lalu tekan <b>Simpan Batas Pelanggaran</b>. Bila siswa melanggar sebanyak itu pada mapel yang sama di hari yang sama, jawaban yang sudah terisi langsung dikumpulkan otomatis dan ujian mapel itu dianggap selesai (tidak bisa diulang). Jika belum pernah diatur, nilai bawaannya <b>2 kali</b>.</p>` },
 
-    { id: 'a20', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana mengaktifkan suara peringatan pelanggaran?',
+    { id: 'a20', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:aturan', q: 'Bagaimana mengaktifkan suara peringatan pelanggaran?',
       k: 'suara pelanggaran audio rekaman mp3 upload peringatan bunyi hp siswa',
       a: `<ol>
             <li>Upload <b>1. Suara Pelanggaran Pertama</b> (diputar untuk pelanggaran ke-1 sampai sebelum batas tercapai).</li>
@@ -10511,7 +10678,7 @@ let mapelDipilih = activeFoundMapelObj;
           <p>File otomatis dikompres menjadi MP3 mono berkualitas rendah di browser sebelum diupload. Durasi disarankan di bawah 8 detik. Tombol putar dan hapus tersedia untuk tiap rekaman.</p>
           <div class="faq-tip">Saklar tidak bisa diaktifkan sebelum kedua rekaman ada.</div>` },
 
-    { id: 'a21', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', pop: 1, q: 'Apa fungsi Batas Soal Pilihan Ganda (Acak & Ganti Soal)?',
+    { id: 'a21', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:aturan', pop: 1, q: 'Apa fungsi Batas Soal Pilihan Ganda (Acak & Ganti Soal)?',
       k: 'batas soal pilihan ganda acak ganti soal jumlah soal ditampilkan pengganti stok nol nonaktif',
       a: `<p>Mengatur jumlah soal pilihan ganda yang tampil ke siswa tiap sesi.</p>
           <ul>
@@ -10521,7 +10688,7 @@ let mapelDipilih = activeFoundMapelObj;
           </ul>
           <div class="faq-warn">Guru harus menginput soal <b>lebih banyak</b> dari batas ini. Jika jumlah soal tidak melebihi batas, semua soal dipakai dan tidak ada stok untuk diganti.</div>` },
 
-    { id: 'a22', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', pop: 1, q: 'Kapan harus menjalankan "Siapkan Cache Soal"?',
+    { id: 'a22', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:sistem', pop: 1, q: 'Kapan harus menjalankan "Siapkan Cache Soal"?',
       k: 'cache soal siapkan periksa status pemanasan cepat lonjakan ratusan siswa mulai bersamaan',
       a: `<p>Jalankan <b>sebelum ujian dimulai</b> agar ratusan siswa yang menekan Mulai Ujian bersamaan tidak membuat server membaca sheet Soal berulang-ulang.</p>
           <ul>
@@ -10530,15 +10697,15 @@ let mapelDipilih = activeFoundMapelObj;
           </ul>
           <div class="faq-tip">Jalankan lagi setelah guru menambah atau mengubah soal menjelang ujian.</div>` },
 
-    { id: 'a23', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Apa fungsi "Simpan Draf Jawaban Ujian"?',
+    { id: 'a23', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:aturan', q: 'Apa fungsi "Simpan Draf Jawaban Ujian"?',
       k: 'draf jawaban auto save simpan otomatis relogin logout jawaban hilang',
       a: `<p>Bila aktif, draf jawaban siswa diamankan saat ia ter-logout atau login kembali, sehingga jawaban yang sudah terisi tidak hilang. Ini berguna untuk siswa yang terkena pelanggaran lalu login ulang.</p>` },
 
-    { id: 'a24', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana membatasi kelas yang boleh melaksanakan ujian?',
+    { id: 'a24', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:akses', q: 'Bagaimana membatasi kelas yang boleh melaksanakan ujian?',
       k: 'kelas peserta ujian jurusan seluruh kelas x xi xii akl mplb tjkt izin batasi',
       a: `<p>Buka <i>Pengaturan Ujian</i> &gt; <b>Kelas Peserta Ujian</b>. Centang <b>Seluruh Kelas X</b> (atau XI/XII) untuk memilih semua jurusan, atau centang jurusan tertentu saja (AKL, MPLB, TJKT). Klik <b>Simpan Kelas Peserta Ujian</b>. Siswa dari kelas yang tidak dicentang tidak bisa membuka mapel atau memulai ujian; siswa yang sudah mengerjakan tetap bisa mengumpulkan jawaban. Minimal satu kelas harus dipilih.</p>` },
 
-    { id: 'a25', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', pop: 1, q: 'Bagaimana mengisi Link Folder Google Drive untuk backup nilai guru?',
+    { id: 'a25', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:sistem', pop: 1, q: 'Bagaimana mengisi Link Folder Google Drive untuk backup nilai guru?',
       k: 'folder drive google backup link nilai pdf akses editor izin simpan gagal',
       a: `<ol>
             <li>Buat folder di Google Drive, lalu <b>bagikan dengan akses Editor</b> ke akun Google pemilik script aplikasi ini.</li>
@@ -10547,11 +10714,11 @@ let mapelDipilih = activeFoundMapelObj;
           </ol>
           <p>Selama link belum diisi, guru <b>tidak dapat</b> melakukan Backup Data Nilai.</p>` },
 
-    { id: 'a26', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', q: 'Bagaimana mengganti periode ujian aktif?',
+    { id: 'a26', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:jadwal', q: 'Bagaimana mengganti periode ujian aktif?',
       k: 'periode ujian aktif mid semester ganjil genap uts uas ubah simpan otomatis tanggal bulan mulai jadwal',
       a: `<p>Periode berganti <b>otomatis mengikuti tanggal</b>. Di <i>Kontrol Periode Ujian Aktif</i>, isi <b>tanggal mulai</b> (tanggal dan bulan saja, tanpa tahun) untuk tiap periode: Mid Semester Ganjil (UTS 1), Semester Ganjil (UAS 1), Mid Semester Genap (UTS 2), dan Semester Genap (UAS 2), lalu tekan <b>Simpan Pengaturan Periode</b>. Contoh: Mid Semester Ganjil 1 Juli dan Semester Ganjil 1 Oktober; pada 1 Oktober periode otomatis berganti ke Semester Ganjil. Sebuah periode aktif sampai tanggal mulai periode berikutnya, dan jadwal berulang tiap tahun sehingga cukup diisi sekali. Tiap periode harus punya tanggal mulai yang berbeda, dan periode yang dikosongkan dilewati. Periode hanya menjadi penanda dan pemberitahuan, tidak menyaring mapel.</p>` },
 
-    { id: 'a31', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode', q: 'Bagaimana menampilkan atau menyembunyikan FAQ Pintar?',
+    { id: 'a31', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:akses', q: 'Bagaimana menampilkan atau menyembunyikan FAQ Pintar?',
       k: 'faq pintar tombol bantuan sembunyikan tampilkan saklar nonaktif matikan pojok kiri bawah',
       a: `<p>Di tab <b>Pengaturan Ujian</b>, ubah saklar <b>Tampilkan FAQ Pintar</b>.</p>
           <ul>
@@ -10560,7 +10727,7 @@ let mapelDipilih = activeFoundMapelObj;
           </ul>
           <p>Setiap akun hanya melihat FAQ untuk perannya sendiri, ditambah FAQ <b>Siswa</b>. Akun siswa tidak pernah menampilkan FAQ Pintar, apa pun pengaturannya.</p>` },
 
-    { id: 'a32', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode', q: 'Bagaimana menampilkan atau menyembunyikan tab DKN dan kolom Edit di panel guru?',
+    { id: 'a32', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:akses', q: 'Bagaimana menampilkan atau menyembunyikan tab DKN dan kolom Edit di panel guru?',
       k: 'dkn tab guru saklar kolom edit rekap nilai aktifkan nonaktifkan sembunyikan tampilkan edit nilai',
       a: `<p>Di tab <b>Pengaturan Ujian</b> ada dua saklar untuk Panel Guru:</p>
           <ul>
@@ -10569,7 +10736,7 @@ let mapelDipilih = activeFoundMapelObj;
           </ul>
           <div class="faq-tip">Nilai edit yang sudah tersimpan tidak terhapus saat saklar dimatikan.</div>` },
 
-    { id: 'a40', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode', q: 'Bagaimana mengunci soal mapel supaya guru tidak bisa mengedit atau menghapus saat ujian?',
+    { id: 'a40', r: 'admin', c: 'Pengaturan Ujian', ctx: 'admin:periode', go: 'admin:periode:akses', q: 'Bagaimana mengunci soal mapel supaya guru tidak bisa mengedit atau menghapus saat ujian?',
       k: 'kunci soal mapel guru edit hapus impor ujian berlangsung saklar lepas kunci terkunci filter kelas jurusan centang',
       a: `<p>Di tab <b>Pengaturan Ujian</b>, gunakan kartu <b>Saklar Kunci Soal Mapel</b>.</p>
           <ol>
@@ -11097,6 +11264,10 @@ let mapelDipilih = activeFoundMapelObj;
         'admin:siswa':     { role: 'admin', label: 'Buka Manajemen Siswa & Ruang', fn: () => switchAdminMainTab('siswa') },
         'admin:mapel':     { role: 'admin', label: 'Buka Manajemen Mapel',         fn: () => switchAdminMainTab('mapel') },
         'admin:periode':   { role: 'admin', label: 'Buka Pengaturan Ujian',        fn: () => switchAdminMainTab('periode') },
+        'admin:periode:jadwal': { role: 'admin', label: 'Buka Pengaturan Ujian: Jadwal dan Waktu',          fn: () => bukaPengaturanSub('jadwal') },
+        'admin:periode:aturan': { role: 'admin', label: 'Buka Pengaturan Ujian: Aturan Ujian',              fn: () => bukaPengaturanSub('aturan') },
+        'admin:periode:akses':  { role: 'admin', label: 'Buka Pengaturan Ujian: Akses, Kunci dan Panel Guru', fn: () => bukaPengaturanSub('akses') },
+        'admin:periode:sistem': { role: 'admin', label: 'Buka Pengaturan Ujian: Data dan Sistem',           fn: () => bukaPengaturanSub('sistem') },
         'admin:akun-token':{ role: 'admin', label: 'Buka Kredensial',              fn: () => switchAdminMainTab('akun-token') },
         'admin:tampilan':  { role: 'admin', label: 'Buka Tampilan',                fn: () => switchAdminMainTab('tampilan') },
         'guru:input':      { role: 'guru',  label: 'Buka Input Soal',              fn: () => switchGuruTab('input') },
