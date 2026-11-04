@@ -2731,6 +2731,17 @@
     EXAM-CBT SMK SWASTA NUSANTARA LUBUK PAKAM &copy; 2026
 </footer>
 
+<div id="pgFotoModal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4" onclick="if(event.target===this)pgTutupFoto()">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-4 space-y-3">
+        <div id="pgFotoBesar" class="w-full aspect-square rounded-xl bg-slate-100 text-slate-400 text-7xl font-bold overflow-hidden grid place-items-center"></div>
+        <div class="text-center">
+            <p id="pgFotoNama" class="font-bold text-slate-800 break-words"></p>
+            <p id="pgFotoMeta" class="text-xs text-slate-500"></p>
+        </div>
+        <button type="button" onclick="pgTutupFoto()" class="w-full px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-50">Tutup</button>
+    </div>
+</div>
+
 <div id="profilHapusModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4 max-h-[92vh] overflow-y-auto">
         <h3 class="text-base font-bold text-slate-800"><i class="fa-solid fa-trash text-rose-500 mr-2"></i>Hapus Foto Profil</h3>
@@ -3441,6 +3452,11 @@
     // "Batas Kumpul (X Menit Terakhir)" dari Manajemen Mapel (sama seperti tombol kumpul biasa).
     let examTargetTimeMs = 0;
     let examBatasKumpulMs = 0;
+    // revisi 144 (Mode Jadwal): jam & jendela dari SERVER, bukan jam HP siswa.
+    // modeJadwalDariServer: true/false dari server; null = server lama (tanpa data jadwal).
+    let modeJadwalDariServer = null;
+    let jadwalBerakhirServerMs = 0;   // epoch ms Jam Berakhir hari ini (zona Asia/Jakarta)
+    let selisihJamServerMs = 0;       // jam server - jam perangkat, dihitung sekali saat ujian dimulai
     let isAntiSplitscreenEnabled = true;
     let splitScreenResizeDebounce = null;
     let examWakeLockSentinel = null; // menyimpan objek Wake Lock aktif selama ujian, supaya bisa dilepas manual saat ujian selesai
@@ -4463,6 +4479,10 @@ let mapelDipilih = activeFoundMapelObj;
                 essayUjianAktif = res.essays || [];
                 // Mode Waktu Per Soal: waktu EFEKTIF per soal (detik) dari server; 0 = mode mati.
                 waktuPerSoalDetik = parseInt(res.waktuPerSoalDetik || 0, 10) || 0;
+                // revisi 144: sinkronkan jam perangkat dengan jam server (dipakai Mode Jadwal)
+                modeJadwalDariServer = (typeof res.jadwalAktif === 'boolean') ? res.jadwalAktif : null;
+                jadwalBerakhirServerMs = parseInt(res.jadwalBerakhirMs || 0, 10) || 0;
+                selisihJamServerMs = res.serverNowMs ? (parseInt(res.serverNowMs, 10) - Date.now()) : 0;
 
                 // SUARA PELANGGARAN: disiapkan sekali di sini (kalau saklar admin
                 // aktif) supaya saat pelanggaran benar2 terjadi nanti, suara sudah
@@ -4576,8 +4596,15 @@ let mapelDipilih = activeFoundMapelObj;
         // Target waktu selesai = Jam Berakhir HARI INI (hanya jam, tanpa tanggal, sama untuk
         // semua siswa mapel ini) - bukan durasi relatif per siswa, dan bukan
         // pula batas waktu submit, melainkan jendela waktu ujian itu sendiri.
-        if (isModeJadwalWaktuAktif && mapelInfo.waktuBerakhir) {
-            let tBerakhir = buatTimestampJamHariIni(mapelInfo.waktuBerakhir);
+        // revisi 144: keputusan mode & Jam Berakhir mengikuti SERVER (epoch ms, dikonversi ke jam
+        // perangkat lewat selisih jam server), jadi HP dengan jam/zona waktu meleset tetap benar.
+        let pakaiJadwalServer = (modeJadwalDariServer === null)
+            ? isModeJadwalWaktuAktif
+            : (modeJadwalDariServer === true);
+        if (pakaiJadwalServer && mapelInfo.waktuBerakhir) {
+            let tBerakhir = (jadwalBerakhirServerMs > 0)
+                ? (jadwalBerakhirServerMs - selisihJamServerMs)
+                : buatTimestampJamHariIni(mapelInfo.waktuBerakhir);
             if (tBerakhir !== null) {
                 targetTime = tBerakhir;
                 // Simpan juga ke localStorage (dipakai fallback timer di tempat lain
@@ -5329,6 +5356,12 @@ let mapelDipilih = activeFoundMapelObj;
                         if (kumpulSelesai) return;
                         if (res && (res.status === "success" || res.status === "duplicate")) {
                             selesaiKumpul(res);
+                            return;
+                        }
+                        // revisi 144: Mode Jadwal - server menolak karena lewat Jam Berakhir + toleransi.
+                        // Berhenti mengulang; jawaban tetap di perangkat, pengawas bisa memakai Kumpul Paksa.
+                        if (res && res.kode === "WAKTU_HABIS_JADWAL") {
+                            gagalAkhirKumpul(res.message, "Waktu Ujian Berakhir");
                             return;
                         }
                         // Server membalas sibuk / antrean penuh: biarkan hitungan berjalan, lalu diulang.
@@ -8545,6 +8578,9 @@ let mapelDipilih = activeFoundMapelObj;
                 return;
             }
 
+            const tampilFoto = resultList.some(x => x && x.fotoAktif === true);   // diputuskan SERVER (peran + saklar foto profil)
+            window._pgFotoList = tampilFoto ? resultList : [];
+
             let html = `
                 <div class="bg-primary-50 border border-primary-200 p-4 rounded-xl space-y-3 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -8581,6 +8617,7 @@ let mapelDipilih = activeFoundMapelObj;
                             <tr>
                                 <th class="p-3 text-center w-10"><input type="checkbox" id="chk-paksa-kumpul-semua" onchange="toggleSemuaPaksaKumpul(this)" class="w-4 h-4 cursor-pointer" title="Pilih semua siswa yang sedang mengerjakan"></th>
                                 <th class="p-3 text-center w-10">No</th>
+                                ${tampilFoto ? '<th class="p-3 text-center w-16">Foto</th>' : ''}
                                 <th class="p-3">Nama Siswa</th>
                                 <th class="p-3">Kelas / Jurusan</th>
                                 <th class="p-3 text-center">Riwayat Status Hari Ini (Titik Warna)</th>
@@ -8629,6 +8666,7 @@ let mapelDipilih = activeFoundMapelObj;
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 text-center">${checkboxCell}</td>
                         <td class="p-3 text-center font-bold text-slate-700">${idx + 1}</td>
+                        ${tampilFoto ? pgSelFoto_(idx, s) : ''}
                         <td class="p-3 font-semibold text-slate-900">${s.nama} <span class="text-[10px] font-mono text-slate-400 block">${s.username}</span></td>
                         <td class="p-3"><span class="bg-primary-50 text-primary-700 px-2 py-0.5 rounded font-medium">${s.kelas} ${s.jurusan}</span></td>
                         <td class="p-3 text-center whitespace-nowrap bg-slate-50/50">
@@ -8644,10 +8682,38 @@ let mapelDipilih = activeFoundMapelObj;
             html += `</tbody></table></div>`;
             container.innerHTML = html;
             updateJumlahPaksaKumpulTerpilih();
+            if (tampilFoto) pgIsiFotoMonitoring_(resultList);
         }).getMonitoringLiveByRuang(ruangVal);
     }
 
-    // ================= FITUR: PENGAWAS PAKSA KUMPUL JAWABAN SISWA =================
+    // ===== REVISI 143: FOTO SISWA DI MONITORING PENGAWAS UJIAN (tampil hanya bila server mengirim fotoAktif = saklar foto profil hidup) =====
+function pgSelFoto_(idx, s) {
+    const ada = !!(s && s.fotoUrl);
+    return '<td class="p-3 text-center"><div class="pg-foto w-12 h-12 mx-auto rounded-lg bg-slate-100 text-slate-500 font-bold grid place-items-center overflow-hidden'
+        + (ada ? ' cursor-pointer ring-1 ring-slate-200 hover:ring-primary-400" title="Klik untuk memperbesar" onclick="pgBukaFoto(' + idx + ')"' : '"')
+        + ' data-i="' + idx + '"></div></td>';
+}
+function pgIsiFotoMonitoring_(list) {
+    document.querySelectorAll('#pengawas-monitoring-container .pg-foto').forEach(function (el) {
+        const s = list[parseInt(el.getAttribute('data-i'), 10)];
+        if (s) fpFillAvatar_(el, s.fotoUrl, s.nama, 96);   // foto kecil; bila tidak ada / gagal dimuat tetap tampil inisial
+    });
+}
+function pgBukaFoto(i) {
+    const s = (window._pgFotoList || [])[i];
+    if (!s || !s.fotoUrl) return;
+    document.getElementById('pgFotoNama').textContent = s.nama || '';
+    document.getElementById('pgFotoMeta').textContent = [[s.kelas, s.jurusan].filter(Boolean).join(' '), s.ruang || ''].filter(Boolean).join('  ·  ');
+    fpFillAvatar_(document.getElementById('pgFotoBesar'), s.fotoUrl, s.nama, 600);
+    document.getElementById('pgFotoModal').classList.remove('hidden');
+}
+function pgTutupFoto() {
+    const m = document.getElementById('pgFotoModal'); if (m) m.classList.add('hidden');
+    const b = document.getElementById('pgFotoBesar'); if (b) b.textContent = '';
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTutupFoto(); });
+
+// ================= FITUR: PENGAWAS PAKSA KUMPUL JAWABAN SISWA =================
 
     function toggleSemuaPaksaKumpul(masterCheckbox) {
         document.querySelectorAll('.chk-paksa-kumpul-item').forEach(chk => {
@@ -12116,8 +12182,13 @@ function psBuild_() {
     + '<div><label class="' + lbl + '">Status Foto</label><select id="psStatus" onchange="renderProfilSiswa_(true)" class="' + sel + '"><option value="ALL">Semua</option><option value="ADA">Sudah ada foto</option><option value="BELUM">Belum ada foto</option><option value="DIHAPUS">Foto dihapus (belum diganti)</option></select></div>'
     + '<div class="col-span-2 md:col-span-1"><label class="' + lbl + '">Cari Nama / Username</label><input type="text" id="psCari" oninput="psCariDebounce_()" placeholder="Ketik nama atau username" class="' + sel + '"></div>'
     + '</div>'
-    + '<div class="flex items-center justify-between gap-3"><p id="psInfo" class="text-xs text-slate-500">Memuat...</p>'
-    + '<button type="button" onclick="loadProfilSiswa()" class="text-xs font-bold text-primary-700 border border-primary-200 px-3 py-1.5 rounded-lg hover:bg-primary-50"><i class="fa-solid fa-rotate mr-1"></i>Muat ulang</button></div>'
+    + '<div class="flex flex-wrap items-center justify-between gap-3"><p id="psInfo" class="text-xs text-slate-500">Memuat...</p>'
+    + '<div class="flex flex-wrap items-center gap-2">'
+    + '<button type="button" onclick="psEkspor()" title="Simpan foto profil + catatan penghapusan siswa sesuai filter Kelas / Jurusan / Ruang yang sedang dipilih ke satu berkas ZIP" class="text-xs font-bold text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-50"><i class="fa-solid fa-file-zipper mr-1"></i>Ekspor Foto (ZIP)</button>'
+    + '<button type="button" onclick="document.getElementById(\'psFileImpor\').click()" title="Masukkan foto dari ZIP hasil Ekspor (dari aplikasi Apps Script atau Python)" class="text-xs font-bold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50"><i class="fa-solid fa-file-import mr-1"></i>Impor Foto (ZIP)</button>'
+    + '<label class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 cursor-pointer"><input type="checkbox" id="psTimpa" class="w-3.5 h-3.5">Timpa foto yang sudah ada</label>'
+    + '<input type="file" id="psFileImpor" accept=".zip,application/zip" class="hidden" onchange="psImporPilih(this)">'
+    + '<button type="button" onclick="loadProfilSiswa()" class="text-xs font-bold text-primary-700 border border-primary-200 px-3 py-1.5 rounded-lg hover:bg-primary-50"><i class="fa-solid fa-rotate mr-1"></i>Muat ulang</button></div></div>'
     + '</div>'
     + '<div id="psGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"></div>'
     + '<div id="psMore" class="hidden text-center"><button type="button" onclick="psTampilLagi_()" class="px-4 py-2 rounded-lg border text-xs font-bold text-slate-700 bg-white hover:bg-slate-50">Tampilkan lebih banyak</button></div>';
@@ -12296,6 +12367,202 @@ function psKonfirmasiHapus() {
     selesai();
     er.textContent = 'Tidak ada balasan dari server. Penghapusan mungkin sudah berhasil; tutup jendela ini lalu tekan "Muat ulang" untuk memastikan. Detail: ' + ((err && err.message) || err); er.classList.remove('hidden');
   }).hapusFotoProfilSiswa(x.username, kode, lain);
+}
+
+/* =====================================================================
+   REVISI 144 - EKSPOR / IMPOR FOTO PROFIL SISWA (ZIP, pindah Apps Script <-> Python)
+   Isi ZIP: profil_siswa.json + foto/NNNNNN.jpg. Format SAMA di kedua versi aplikasi.
+   ZIP dibuat & dibaca di browser (tanpa library); server melayani per batch kecil.
+   ===================================================================== */
+const PS_SUMBER = 'apps-script';
+const PS_EKSPOR_BATCH = 8, PS_IMPOR_BATCH = 5;
+const PS_FOTO_MAX_B64 = 120000;
+const PS_CRC_TABEL = (function () {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; }
+  return t;
+})();
+function psCrc32_(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = PS_CRC_TABEL[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function psU8ToB64_(u8) { let s = ''; const k = 0x8000; for (let i = 0; i < u8.length; i += k) s += String.fromCharCode.apply(null, u8.subarray(i, i + k)); return btoa(s); }
+function psB64ToU8_(b) { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+function psTunggu_(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ZIP tanpa kompresi (foto JPG sudah terkompresi). berkas: [{nama, data: Uint8Array}]
+function psBuatZip_(berkas) {
+  const enc = new TextEncoder(), bagian = [], pusat = [];
+  const w = new Date();
+  const dosTime = (w.getHours() << 11) | (w.getMinutes() << 5) | (w.getSeconds() >> 1);
+  const dosDate = ((w.getFullYear() - 1980) << 9) | ((w.getMonth() + 1) << 5) | w.getDate();
+  let offset = 0;
+  berkas.forEach(f => {
+    const nm = enc.encode(f.nama), crc = psCrc32_(f.data), sz = f.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true); h.setUint32(14, crc, true);
+    h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+    bagian.push(new Uint8Array(h.buffer), nm, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true); c.setUint32(16, crc, true);
+    c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true);
+    c.setUint32(42, offset, true);
+    pusat.push(new Uint8Array(c.buffer), nm);
+    offset += 30 + nm.length + sz;
+  });
+  let ukPusat = 0; pusat.forEach(p => { ukPusat += p.length; });
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, berkas.length, true); e.setUint16(10, berkas.length, true);
+  e.setUint32(12, ukPusat, true); e.setUint32(16, offset, true);
+  return new Blob(bagian.concat(pusat, [new Uint8Array(e.buffer)]), { type: 'application/zip' });
+}
+
+// Baca ZIP (tanpa kompresi, atau deflate bila browser mendukung DecompressionStream). Hasil: {nama: Uint8Array}
+async function psBacaZip_(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  let e = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) { if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; } }
+  if (e < 0) throw new Error('Berkas bukan ZIP yang valid.');
+  const total = dv.getUint16(e + 10, true), dec = new TextDecoder(), hasil = {};
+  let p = dv.getUint32(e + 16, true);
+  for (let n = 0; n < total; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('Struktur ZIP rusak.');
+    const metode = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true);
+    const ln = dv.getUint16(p + 28, true), le = dv.getUint16(p + 30, true), lc = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const nama = dec.decode(u8.subarray(p + 46, p + 46 + ln));
+    p += 46 + ln + le + lc;
+    if (nama.slice(-1) === '/') continue;
+    const mulai = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+    const mentah = u8.subarray(mulai, mulai + csz);
+    if (metode === 0) hasil[nama] = mentah;
+    else if (metode === 8) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('Browser ini belum mendukung ZIP terkompresi. Pakai ZIP hasil Ekspor aplikasi ini atau perbarui browser.');
+      const ds = new DecompressionStream('deflate-raw');
+      hasil[nama] = new Uint8Array(await new Response(new Blob([mentah]).stream().pipeThrough(ds)).arrayBuffer());
+    } else throw new Error('Metode kompresi ZIP tidak didukung.');
+  }
+  return hasil;
+}
+
+// Panggilan server dibungkus Promise + 3x coba ulang untuk gangguan sementara.
+function psAmbilBatch_(daftar) {
+  return new Promise((ok, gagal) => srv.withSuccessHandler(ok).withFailureHandler(gagal).ambilFotoProfilBatch(daftar));
+}
+function psImporBatch_(items, timpa) {
+  return new Promise((ok, gagal) => srv.withSuccessHandler(ok).withFailureHandler(gagal).imporFotoProfilBatch(items, timpa));
+}
+async function psCoba_(fn) {
+  let err;
+  for (let i = 0; i < 3; i++) {
+    try { const r = await fn(); if (r && r.success === false) throw new Error(r.message || 'Server menolak permintaan.'); return r; }
+    catch (e) { err = e; await psTunggu_(1500 * (i + 1)); }
+  }
+  throw err;
+}
+function psPesanErr_(e) { return (e && e.message) ? e.message : String(e); }
+
+function psEkspor() {
+  if (_psBusy) return;
+  // Ekspor mengikuti filter Kelas / Jurusan / Ruang yang sedang dipilih (lebih ringan & aman dari timeout).
+  const fKelas = psV_('Kelas') || 'ALL', fJurusan = psV_('Jurusan') || 'ALL', fRuang = psV_('Ruang') || 'ALL';
+  const labelFilter = [fKelas === 'ALL' ? 'Semua kelas' : 'Kelas ' + fKelas, fJurusan === 'ALL' ? 'semua jurusan' : fJurusan, fRuang === 'ALL' ? 'semua ruang' : fRuang].join(' · ');
+  const namaFilter = [fKelas, fJurusan, fRuang].filter(v => v !== 'ALL').map(v => String(v).replace(/[^A-Za-z0-9]+/g, '')).join('_');
+  _psBusy = true;
+  showLoading('Ekspor Foto Profil', 'Mengambil daftar siswa (' + labelFilter + ')...');
+  srv.withSuccessHandler(async res => {
+    try {
+      if (!res || !res.success) throw new Error('Gagal memuat daftar siswa.');
+      const siswa = res.siswa || [], adaFoto = siswa.filter(x => x.fotoUrl), peta = {}, gagalFoto = [];
+      for (let i = 0; i < adaFoto.length; i += PS_EKSPOR_BATCH) {
+        const batch = adaFoto.slice(i, i + PS_EKSPOR_BATCH).map(x => x.username);
+        updateLoadingSubtitle('Mengambil foto ' + Math.min(i + batch.length, adaFoto.length) + ' dari ' + adaFoto.length + '...');
+        const r = await psCoba_(() => psAmbilBatch_(batch));
+        (r.fotos || []).forEach(f => { if (f.base64) peta[String(f.username)] = f.base64; else gagalFoto.push(f.username); });
+      }
+      updateLoadingSubtitle('Menyusun berkas ZIP...');
+      const berkas = [], meta = []; let no = 0;
+      siswa.forEach(x => {
+        let nm = '';
+        if (peta[String(x.username)]) { nm = 'foto/' + String(++no).padStart(6, '0') + '.jpg'; berkas.push({ nama: nm, data: psB64ToU8_(peta[String(x.username)]) }); }
+        meta.push({ username: x.username, nama: x.nama, kelas: x.kelas, jurusan: x.jurusan, ruang: x.ruang, foto: nm, alasan: x.alasan || '', tgl: x.tgl || '', oleh: x.oleh || '' });
+      });
+      const json = { format: 'profil-siswa-zip', versi: 1, sumber: PS_SUMBER, diekspor: new Date().toISOString(), jumlahSiswa: meta.length, jumlahFoto: no, filter: { kelas: fKelas, jurusan: fJurusan, ruang: fRuang }, siswa: meta };
+      berkas.unshift({ nama: 'profil_siswa.json', data: new TextEncoder().encode(JSON.stringify(json)) });
+      const blob = psBuatZip_(berkas);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Foto_Profil_Siswa_' + (namaFilter ? namaFilter + '_' : 'Semua_') + new Date().toISOString().slice(0, 10) + '.zip';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+      hideLoading(); _psBusy = false;
+      showAlertModal('Ekspor Selesai', labelFilter + ':\n' + no + ' foto dari ' + meta.length + ' siswa disimpan ke berkas ZIP.' +
+        (gagalFoto.length ? '\n\n' + gagalFoto.length + ' foto gagal dibaca dan tidak ikut: ' + gagalFoto.slice(0, 10).join(', ') + (gagalFoto.length > 10 ? ', ...' : '') : ''));
+    } catch (err) {
+      hideLoading(); _psBusy = false;
+      showAlertModal('Ekspor Gagal', psPesanErr_(err));
+    }
+  }).withFailureHandler(err => {
+    hideLoading(); _psBusy = false;
+    showAlertModal('Ekspor Gagal', 'Tidak bisa memuat daftar siswa: ' + psPesanErr_(err));
+  }).getFotoProfilSiswa(fKelas, fJurusan, fRuang);
+}
+
+function psImporPilih(inp) {
+  const f = inp.files && inp.files[0];
+  inp.value = '';
+  if (!f || _psBusy) return;
+  const timpa = !!(document.getElementById('psTimpa') || {}).checked;
+  showConfirmModal('Impor Foto Profil',
+    'Impor foto profil dari "' + f.name + '"?\n\nFoto dicocokkan lewat USERNAME dengan akun siswa yang SUDAH ada di aplikasi ini. ' +
+    (timpa ? 'Foto yang sudah ada akan DITIMPA.' : 'Siswa yang sudah punya foto dilewati.'),
+    () => psImporJalankan_(f, timpa));
+}
+
+async function psImporJalankan_(file, timpa) {
+  if (_psBusy) return;
+  _psBusy = true;
+  showLoading('Impor Foto Profil', 'Membaca berkas ZIP...');
+  const hitung = { tersimpan: 0, catatan_tersimpan: 0, dilewati: 0, tidak_ditemukan: 0, gagal: 0 };
+  const rincian = { tidak_ditemukan: [], gagal: [] };
+  try {
+    const zip = await psBacaZip_(await file.arrayBuffer());
+    if (!zip['profil_siswa.json']) throw new Error('profil_siswa.json tidak ditemukan. Pakai ZIP hasil Ekspor Foto dari aplikasi ini.');
+    let data;
+    try { data = JSON.parse(new TextDecoder().decode(zip['profil_siswa.json'])); } catch (e) { throw new Error('profil_siswa.json rusak.'); }
+    if (!data || data.format !== 'profil-siswa-zip' || !Array.isArray(data.siswa)) throw new Error('Format berkas tidak dikenali.');
+    const items = [];
+    data.siswa.forEach(x => {
+      const uname = String(x.username || '').trim();
+      if (!uname) return;
+      let b64 = '';
+      if (x.foto && zip[x.foto]) b64 = psU8ToB64_(zip[x.foto]);
+      if (!b64 && !String(x.alasan || '').trim()) return;
+      if (b64.length > PS_FOTO_MAX_B64) { hitung.gagal++; rincian.gagal.push(uname + ' (foto terlalu besar)'); return; }
+      items.push({ username: uname, base64: b64, alasan: b64 ? '' : (x.alasan || ''), tgl: x.tgl || '', oleh: x.oleh || '' });
+    });
+    if (!items.length) throw new Error('Tidak ada foto atau catatan yang bisa diimpor di berkas ini.');
+    for (let i = 0; i < items.length; i += PS_IMPOR_BATCH) {
+      const batch = items.slice(i, i + PS_IMPOR_BATCH);
+      updateLoadingSubtitle('Menyimpan ' + Math.min(i + batch.length, items.length) + ' dari ' + items.length + '...');
+      const r = await psCoba_(() => psImporBatch_(batch, timpa));
+      (r.hasil || []).forEach(h => {
+        const k = hitung.hasOwnProperty(h.status) ? h.status : 'gagal';
+        hitung[k]++;
+        if (k === 'tidak_ditemukan') rincian.tidak_ditemukan.push(h.username);
+        if (k === 'gagal') rincian.gagal.push(h.username + (h.message ? ' (' + h.message + ')' : ''));
+      });
+    }
+    hideLoading(); _psBusy = false;
+    let pesan = 'Dari ' + items.length + ' data dalam berkas:\n• ' + hitung.tersimpan + ' foto tersimpan\n• ' + hitung.catatan_tersimpan + ' catatan "foto dihapus admin" dipulihkan\n• ' +
+      hitung.dilewati + ' dilewati (sudah ada)\n• ' + hitung.tidak_ditemukan + ' username tidak ada di aplikasi ini\n• ' + hitung.gagal + ' gagal';
+    if (rincian.tidak_ditemukan.length) pesan += '\n\nUsername tidak ditemukan: ' + rincian.tidak_ditemukan.slice(0, 10).join(', ') + (rincian.tidak_ditemukan.length > 10 ? ', ...' : '');
+    if (rincian.gagal.length) pesan += '\n\nGagal: ' + rincian.gagal.slice(0, 10).join('; ') + (rincian.gagal.length > 10 ? '; ...' : '');
+    showAlertModal('Impor Selesai', pesan);
+    loadProfilSiswa();
+  } catch (err) {
+    hideLoading(); _psBusy = false;
+    showAlertModal('Impor Gagal', psPesanErr_(err) + (hitung.tersimpan + hitung.catatan_tersimpan > 0 ? '\n\nSebagian sudah tersimpan (' + hitung.tersimpan + ' foto). Impor ulang aman: foto yang sudah ada dilewati.' : ''));
+    if (hitung.tersimpan + hitung.catatan_tersimpan > 0) loadProfilSiswa();
+  }
 }
 </script>
 
