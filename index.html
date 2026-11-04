@@ -388,6 +388,28 @@
         .subtab-btn:hover { color: #000; border-color: var(--slate-500, #64748b); }
         .subtab-btn-active, .subtab-btn-active:hover { background: var(--primary-600); color: #fff; border-color: var(--primary-600); box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
         #guru-input-subbar.hidden, #admin-manaj-subbar.hidden { display: none; }
+        /* ===== REVISI 144: Input Soal guru rapi di HP (grid kotak sejajar) ===== */
+        #guru-section .kunci-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        #guru-section .kunci-btn { min-height: 44px; border: 1.5px solid var(--slate-300, #cbd5e1); border-radius: 12px; background: #fff; color: #000; font-weight: 800; font-size: .95rem; transition: all .15s; cursor: pointer; }
+        #guru-section .kunci-btn:hover { border-color: var(--slate-500, #64748b); }
+        #guru-section .kunci-btn[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
+        @media (max-width: 640px) {
+            #guru-section #guru-input-subbar:not(.hidden) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            #guru-section #guru-input-subbar .subtab-btn { flex-direction: column; justify-content: center; text-align: center; gap: .3rem; min-height: 58px; padding: .5rem .25rem; border-radius: 12px; border-width: 1px; font-size: .75rem; font-weight: 600; line-height: 1.2; color: var(--slate-700, #334155); box-shadow: none; }
+            #guru-section #guru-input-subbar .subtab-btn i { font-size: 1.05rem; opacity: .85; }
+            #guru-section #guru-input-subbar .subtab-btn-active, #guru-section #guru-input-subbar .subtab-btn-active:hover { color: #fff; font-weight: 700; }
+            #guru-section #lbl-total-soal-mapel-terpilih { width: 100%; text-align: center; }
+            #guru-section .gi-actions { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
+            #guru-section .gi-actions > button { width: 100%; min-height: 44px; justify-content: center; text-align: center; }
+            #guru-section .gi-massal-act > button { width: 100%; min-height: 44px; }
+            #guru-section #essay-nomor { max-width: 9rem; }
+            #guru-section .gi-bar-aksi { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+            #guru-section .gi-bar-aksi > button { width: 100%; min-height: 42px; justify-content: center; text-align: center; }
+            #guru-section .bank-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+            #guru-section .bank-aksi > button { width: 100%; min-height: 40px; }
+            #guru-section .bank-aksi > span { grid-column: 1 / -1; text-align: center; }
+        }
+
         /* Sub-tab HP: grid 2 kolom, minimalis & rata */
         @media (max-width: 640px) {
             #pengaturan-subbar:not(.hidden), #admin-manaj-subbar:not(.hidden) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -2326,12 +2348,13 @@
                 </div>
                 <div class="text-xs">
                     <label class="block font-bold uppercase text-slate-600 mb-1">Kunci Jawaban Benar</label>
-                    <select id="soal-kunci" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-bold text-primary-700">
+                    <select id="soal-kunci" class="hidden w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-bold text-primary-700">
                         <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
                     </select>
+                    <div class="kunci-grid" id="kunci-grid" role="group" aria-label="Kunci jawaban benar"><button type="button" class="kunci-btn" data-k="A" onclick="pilihKunciSoal('A')" aria-pressed="true">A</button><button type="button" class="kunci-btn" data-k="B" onclick="pilihKunciSoal('B')" aria-pressed="false">B</button><button type="button" class="kunci-btn" data-k="C" onclick="pilihKunciSoal('C')" aria-pressed="false">C</button><button type="button" class="kunci-btn" data-k="D" onclick="pilihKunciSoal('D')" aria-pressed="false">D</button><button type="button" class="kunci-btn" data-k="E" onclick="pilihKunciSoal('E')" aria-pressed="false">E</button></div>
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3 gi-actions">
                     <button type="button" onclick="batalEditSoalLive()" id="btn-cancel-edit-soal" class="hidden px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 text-xs">Batal</button>
                     <button type="button" onclick="tambahSoalGoogleForm()" id="btn-submit-soal" class="bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition shadow flex items-center gap-1.5">
                         <i class="fa-solid fa-plus"></i> <span id="btn-submit-soal-text">Tambah Soal</span>
@@ -2368,7 +2391,7 @@
                     </div>
                 </div>
 
-                <div class="pt-2 text-right">
+                <div class="pt-2 text-right gi-massal-act">
                     <button onclick="prosesUploadSoalExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition shadow-md">
                         Proses & Import Soal Massal
                     </button>
@@ -2382,7 +2405,7 @@
                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Pilih Mapel Bank Soal</label>
                     <select id="filter-bank-soal-mapel" onchange="renderBankSoalGuruFiltered()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white font-medium"></select>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end gi-bar-aksi">
                     <button id="btn-ekspor-bank-soal" onclick="exportActiveBankSoalToExcel()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition shadow-sm items-center gap-1.5">
                         <i class="fa-solid fa-file-excel"></i> Ekspor Excel
                     </button>
@@ -2445,7 +2468,7 @@
                     </div>
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3 gi-actions">
                     <button type="button" onclick="batalEditSoalEssay()" id="btn-cancel-edit-essay" class="hidden px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 text-xs">Batal</button>
                     <button type="button" onclick="simpanSoalEssayGuru()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition shadow flex items-center gap-1.5">
                         <i class="fa-solid fa-plus"></i> <span id="btn-submit-essay-text">Tambah Soal Essay</span>
@@ -8919,6 +8942,20 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTu
     }
 
     let _guruSubInputTerakhir = 'input';
+    /* REVISI 144: kunci jawaban berupa 5 tombol A-E (select #soal-kunci tetap jadi sumber nilai) */
+    function pilihKunciSoal(v) {
+        const s = document.getElementById('soal-kunci');
+        if (s) s.value = v;
+        sinkronKunciSoal();
+    }
+    function sinkronKunciSoal() {
+        const s = document.getElementById('soal-kunci');
+        const v = s ? s.value : 'A';
+        document.querySelectorAll('#kunci-grid .kunci-btn').forEach(function (b) {
+            b.setAttribute('aria-pressed', b.getAttribute('data-k') === v ? 'true' : 'false');
+        });
+    }
+
     function bukaInputSoal() {
         segarkanSaklarGuru();   // REVISI 140: ambil status kunci terbaru
         switchGuruTab(_guruSubInputTerakhir || 'input');
@@ -9072,7 +9109,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTu
         document.getElementById('soal-c').value = "";
         document.getElementById('soal-d').value = "";
         document.getElementById('soal-e').value = "";
-        document.getElementById('soal-kunci').value = "A";
+        document.getElementById('soal-kunci').value = "A"; sinkronKunciSoal();
         document.getElementById('soal-id').value = "";
         document.getElementById('lbl-form-soal-title').innerText = "Pertanyaan Soal Baru";
         document.getElementById('btn-submit-soal-text').innerText = "Tambah Soal";
@@ -9111,7 +9148,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTu
         document.getElementById('soal-c').value = s.opsiC;
         document.getElementById('soal-d').value = s.opsiD;
         document.getElementById('soal-e').value = s.opsiE;
-        document.getElementById('soal-kunci').value = s.kunci;
+        document.getElementById('soal-kunci').value = s.kunci; sinkronKunciSoal();
 
         document.getElementById('lbl-form-soal-title').innerText = "Edit Pertanyaan Soal (ID: " + s.id + ")";
         document.getElementById('btn-submit-soal-text').innerText = "Simpan Perubahan";
@@ -9253,7 +9290,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTu
                         <span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px] shrink-0">Essay</span>
                     </div>
                     ${img}
-                    <div class="pt-1 flex justify-end gap-2">
+                    <div class="pt-1 flex justify-end gap-2 bank-aksi">
                         ${terkunci ? '<span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded font-semibold text-[11px]"><i class="fa-solid fa-lock mr-1"></i>Dikunci admin</span>' : `<button onclick="editSoalEssay('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit</button>
                         <button onclick="confirmHapusSoalEssay('${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>`}
                     </div>
@@ -9518,7 +9555,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pgTu
                                 <div class="teks-opsi hang sm:col-span-2"><span class="hang-no">E.</span><span class="hang-isi">${s.opsiE}</span></div>
                             </div>
                             <div class="pt-1"><span class="teks-kunci-badge inline-block px-2.5 py-1 rounded">Kunci Jawaban: ${s.kunci}</span></div>
-                            <div class="pt-1 flex justify-end gap-2">
+                            <div class="pt-1 flex justify-end gap-2 bank-aksi">
                                 ${terkunci ? '<span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded font-semibold text-[11px]"><i class="fa-solid fa-lock mr-1"></i>Dikunci admin</span>' : `<button onclick="editSoalFromBank('${sJson}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-semibold text-[11px]">Edit Soal</button>`}
                                 ${terkunci ? '' : `<button onclick="confirmHapusSoalFromBank('${s.mapel}', '${s.id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded font-semibold text-[11px]">Hapus</button>`}
                             </div>
